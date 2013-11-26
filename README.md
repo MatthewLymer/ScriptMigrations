@@ -1,2 +1,2 @@
-ScriptMigrations
+Script Migrations
 ================
