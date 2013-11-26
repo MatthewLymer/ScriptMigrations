@@ -129,27 +129,31 @@ namespace Migrator.Tests
                 _mockScriptFinder.Setup(x => x.GetUpMigration()).Returns(_upMigrations);
             }
 
-            [Test]
-            public void ShouldRunAllMigrationsInAscendingOrder()
+            [TestFixture]
+            public class WhenTellingTheMigrationServiceToPerformAnUp : GivenThereAreMultipleMigrations
             {
-                // arrange
-                long lastVersionExecuted = 0;
+                [Test]
+                public void ShouldRunAllMigrationsInAscendingOrder()
+                {
+                    // arrange
+                    long lastVersionExecuted = 0;
 
-                _mockRunner.Setup(x => x.ExecuteUpMigration(It.IsAny<UpMigration>()))
-                    .Callback(new Action<UpMigration>(migration =>
-                    {
-                        Assert.Less(lastVersionExecuted, migration.Version);
-                        lastVersionExecuted = migration.Version;
-                    }));
+                    _mockRunner.Setup(x => x.ExecuteUpMigration(It.IsAny<UpMigration>()))
+                        .Callback(new Action<UpMigration>(migration =>
+                        {
+                            Assert.Less(lastVersionExecuted, migration.Version);
+                            lastVersionExecuted = migration.Version;
+                        }));
 
-                var migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
+                    var migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
 
-                // act
-                migrationService.Up();
+                    // act
+                    migrationService.Up();
 
-                // assert
-                _mockRunner.Verify(x => x.ExecuteUpMigration(It.IsAny<UpMigration>()), Times.Exactly(3));
-                _mockRunner.Verify(x => x.Commit(), Times.Once);
+                    // assert
+                    _mockRunner.Verify(x => x.ExecuteUpMigration(It.IsAny<UpMigration>()), Times.Exactly(3));
+                    _mockRunner.Verify(x => x.Commit(), Times.Once);
+                }                
             }
         }
     }
@@ -169,7 +173,7 @@ namespace Migrator.Tests
         }
 
         [TestFixture]
-        public class WhenTellingTheMigrationServiceToPerformAn : GivenADatabaseWithMigrations
+        public class WhenTellingTheMigrationServiceToPerformAnUp : GivenADatabaseWithMigrations
         {
             private Mock<IScriptFinder> _mockScriptFinder;
             private List<UpMigration> _upMigrations;
