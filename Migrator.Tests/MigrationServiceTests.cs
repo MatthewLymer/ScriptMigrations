@@ -195,6 +195,7 @@ namespace Migrator.Tests
             {
                 // arrange
                 var executedMigrations = new List<long> { 10, 52 };
+                _mockRunner.Setup(x => x.GetExecutedMigrations()).Returns(executedMigrations.AsEnumerable());
 
                 var migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
 
@@ -202,16 +203,10 @@ namespace Migrator.Tests
                 migrationService.Up();
 
                 // assert
-                foreach (var migration in _upMigrations)
+                foreach (var mig in _upMigrations)
                 {
-                    //var times = executedMigrations.Contains(migration.Version) ? Times.Never : Times.Once;
-                    var wasRunBefore = executedMigrations.Contains(migration.Version);
-
-                    if (wasRunBefore)
-                    {
-                        _mockRunner.
-                    }
-
+                    var migration = mig;
+                    var times = executedMigrations.Contains(migration.Version) ? Times.Never() : Times.Once();
                     _mockRunner.Verify(x => x.ExecuteUpMigration(migration), times);
                 }
             }
@@ -236,6 +231,7 @@ namespace Migrator.Tests
     {
         void Commit();
         void ExecuteUpMigration(UpMigration migration);
+        IEnumerable<long> GetExecutedMigrations();
     }
 
     public class MigrationService
@@ -260,7 +256,9 @@ namespace Migrator.Tests
 
             using (var runner = _runnerFactory.Create())
             {
-                foreach (var migration in migrations.OrderBy(x => x.Version))
+                var executedMigrations = runner.GetExecutedMigrations();
+                
+                foreach (var migration in migrations.Where(x => !executedMigrations.Contains(x.Version)).OrderBy(x => x.Version))
                 {
                     runner.ExecuteUpMigration(migration);
                 }
