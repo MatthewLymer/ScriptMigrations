@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using Moq;
 using NUnit.Framework;
@@ -215,42 +214,6 @@ namespace Migrator.Tests
                     var migration = mig;
                     var times = _executedMigrations.Contains(migration.Version) ? Times.Never() : Times.Once();
                     _mockRunner.Verify(x => x.ExecuteUpMigration(migration), times);
-                }
-            }
-        }
-
-        class GivenThereAreNoDownMigrations : GivenADatabaseWithMigrations
-        {
-            private Mock<IScriptFinder> _mockScriptFinder;
-            private MigrationService _migrationService;
-
-            [SetUp]
-            public new void BeforeEachTest()
-            {
-                _mockScriptFinder = new Mock<IScriptFinder>();
-
-                _mockScriptFinder.Setup(x => x.GetDownMigrations()).Returns(new DownMigration[0]);
-
-                _migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
-            }
-
-            [TestFixture]
-            public class WhenTellingTheMigrationServiceToPerformADownToZero : GivenThereAreNoDownMigrations
-            {
-                [Test]
-                public void ShouldThrowException()
-                {
-                    try
-                    {
-                        // act
-                        _migrationService.Down(0);
-                        Assert.Fail();
-                    }
-                    catch (MissingDownMigrationException)
-                    {
-                        // assert
-                        Assert.Pass();
-                    }
                 }
             }
         }
