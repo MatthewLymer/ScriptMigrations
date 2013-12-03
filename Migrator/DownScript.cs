@@ -1,8 +1,8 @@
 ﻿namespace Migrator
 {
-    public class DownMigration
+    public class DownScript
     {
-        public DownMigration(long version)
+        public DownScript(long version)
         {
             Version = version;
         }

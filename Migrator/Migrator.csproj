@@ -39,16 +39,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DownMigration.cs" />
+    <Compile Include="DownScript.cs" />
     <Compile Include="IRunner.cs" />
     <Compile Include="IRunnerFactory.cs" />
     <Compile Include="IScriptFinder.cs" />
     <Compile Include="MigrationFailedException.cs" />
     <Compile Include="MigrationService.cs" />
-    <Compile Include="MigrationVersionNeverExecutedException.cs" />
+    <Compile Include="VersionNeverExecutedException.cs" />
     <Compile Include="MissingDownMigrationException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UpMigration.cs" />
+    <Compile Include="UpScript.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -4,7 +4,7 @@ namespace Migrator
 {
     public interface IScriptFinder
     {
-        IEnumerable<UpMigration> GetUpMigrations();
-        IEnumerable<DownMigration> GetDownMigrations();
+        IEnumerable<UpScript> GetUpScripts();
+        IEnumerable<DownScript> GetDownScripts();
     }
 }

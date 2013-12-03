@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace Migrator
 {
@@ -15,7 +16,7 @@ namespace Migrator
 
         public void Up()
         {
-            var migrations = _scriptFinder.GetUpMigrations();
+            var migrations = _scriptFinder.GetUpScripts();
 
             if (!migrations.Any())
             {
@@ -35,19 +36,43 @@ namespace Migrator
             }
         }
 
-        public void Down(int version)
+        public void DownToZero()
         {
-            if (version > 0)
+            using (var runner = _runnerFactory.Create())
             {
-                throw new MigrationVersionNeverExecutedException();
+                foreach (var downMigration in _scriptFinder.GetDownScripts().OrderByDescending(m => m.Version))
+                {
+                    runner.ExecuteDownScript(downMigration);
+                }
+
+                runner.Commit();
+            }            
+        }
+
+        public void DownToVersion(long version)
+        {
+            if (version <= 0)
+            {
+                throw new ArgumentOutOfRangeException("version");
             }
 
             using (var runner = _runnerFactory.Create())
             {
-                foreach (var downMigration in _scriptFinder.GetDownMigrations().OrderByDescending(m => m.Version))
+                var executedMigrations = runner.GetExecutedMigrations();
+
+                if (!executedMigrations.Contains(version))
                 {
-                    runner.ExecuteDownMigration(downMigration);
-                }    
+                    throw new VersionNeverExecutedException();   
+                }
+
+                var downMigrations = _scriptFinder.GetDownScripts().ToList();
+
+                foreach (var executedMigration in executedMigrations.Where(m => m > version).OrderByDescending(m => m))
+                {
+                    var downMigration = downMigrations.SingleOrDefault(m => m.Version == executedMigration);
+
+                    runner.ExecuteDownScript(downMigration);
+                }
 
                 runner.Commit();
             }

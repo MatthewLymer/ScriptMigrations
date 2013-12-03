@@ -41,7 +41,7 @@ namespace Migrator.Tests
             }
         }
 
-        class GivenThereIsOneUpMigration : GivenAnEmptyDatabase
+        class GivenThereIsOneUpScript : GivenAnEmptyDatabase
         {
             private Mock<IScriptFinder> _mockScriptFinder;
 
@@ -50,11 +50,11 @@ namespace Migrator.Tests
             {
                 _mockScriptFinder = new Mock<IScriptFinder>();
 
-                _mockScriptFinder.Setup(x => x.GetUpMigrations()).Returns(new[]{new UpMigration(25)});
+                _mockScriptFinder.Setup(x => x.GetUpScripts()).Returns(new[]{new UpScript(25)});
             }
 
             [TestFixture]
-            public class WhenTellingTheUpMigrationServiceToPerformAnUp : GivenThereIsOneUpMigration
+            public class WhenTellingTheUpMigrationServiceToPerformAnUp : GivenThereIsOneUpScript
             {
                 private MigrationService _migrationService;
 
@@ -71,7 +71,7 @@ namespace Migrator.Tests
                     _migrationService.Up();
 
                     // assert
-                    _mockRunner.Verify(x => x.ExecuteUpMigration(It.IsAny<UpMigration>()), Times.Once);
+                    _mockRunner.Verify(x => x.ExecuteUpMigration(It.IsAny<UpScript>()), Times.Once);
                     _mockRunner.Verify(x => x.Commit(), Times.Once);
                 }
 
@@ -91,7 +91,7 @@ namespace Migrator.Tests
                     // arrange
                     var migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
 
-                    _mockRunner.Setup(x => x.ExecuteUpMigration(It.IsAny<UpMigration>())).Throws<MigrationFailedException>();
+                    _mockRunner.Setup(x => x.ExecuteUpMigration(It.IsAny<UpScript>())).Throws<MigrationFailedException>();
 
                     // act
                     try
@@ -111,21 +111,21 @@ namespace Migrator.Tests
         class GivenThereAreMultipleUpMigrations : GivenAnEmptyDatabase
         {
             private Mock<IScriptFinder> _mockScriptFinder;
-            private List<UpMigration> _upMigrations;
+            private List<UpScript> _upMigrations;
 
             [SetUp]
             public new void BeforeEachTest()
             {
-                _upMigrations = new List<UpMigration>
+                _upMigrations = new List<UpScript>
                 {
-                    new UpMigration(25),
-                    new UpMigration(45),
-                    new UpMigration(13)
+                    new UpScript(25),
+                    new UpScript(45),
+                    new UpScript(13)
                 };
 
                 _mockScriptFinder = new Mock<IScriptFinder>();
 
-                _mockScriptFinder.Setup(x => x.GetUpMigrations()).Returns(_upMigrations);
+                _mockScriptFinder.Setup(x => x.GetUpScripts()).Returns(_upMigrations);
             }
 
             [TestFixture]
@@ -137,8 +137,8 @@ namespace Migrator.Tests
                     // arrange
                     long lastVersionExecuted = 0;
 
-                    _mockRunner.Setup(x => x.ExecuteUpMigration(It.IsAny<UpMigration>()))
-                        .Callback(new Action<UpMigration>(migration =>
+                    _mockRunner.Setup(x => x.ExecuteUpMigration(It.IsAny<UpScript>()))
+                        .Callback(new Action<UpScript>(migration =>
                         {
                             Assert.Less(lastVersionExecuted, migration.Version);
                             lastVersionExecuted = migration.Version;
@@ -150,7 +150,7 @@ namespace Migrator.Tests
                     migrationService.Up();
 
                     // assert
-                    _mockRunner.Verify(x => x.ExecuteUpMigration(It.IsAny<UpMigration>()), Times.Exactly(3));
+                    _mockRunner.Verify(x => x.ExecuteUpMigration(It.IsAny<UpScript>()), Times.Exactly(3));
                     _mockRunner.Verify(x => x.Commit(), Times.Once);
                 }                
             }
@@ -164,13 +164,24 @@ namespace Migrator.Tests
         private Mock<IRunnerFactory> _mockRunnerFactory;
         private Mock<IRunner> _mockRunner;
 
+        protected void EnsureDownScriptsExecutedInDescendingOrder()
+        {
+            var lastVersionExecuted = long.MaxValue;
+
+            _mockRunner.Setup(x => x.ExecuteDownScript(It.IsAny<DownScript>()))
+                .Callback(new Action<DownScript>(migration => {
+                    Assert.Greater(lastVersionExecuted, migration.Version);
+                    lastVersionExecuted = migration.Version;
+                }));
+        }
+
         [SetUp]
         public void BeforeEachTest()
         {
             _mockRunnerFactory = new Mock<IRunnerFactory>();
             _mockRunner = new Mock<IRunner>();
 
-            _executedMigrations = new List<long> { 10, 52 };
+            _executedMigrations = new List<long> { 10, 52, 96 };
 
             _mockRunnerFactory.Setup(x => x.Create()).Returns(_mockRunner.Object);
 
@@ -181,22 +192,22 @@ namespace Migrator.Tests
         public class WhenTellingTheMigrationServiceToPerformAnUp : GivenADatabaseWithMigrations
         {
             private Mock<IScriptFinder> _mockScriptFinder;
-            private List<UpMigration> _upMigrations;
+            private List<UpScript> _upMigrations;
 
             [SetUp]
             public new void BeforeEachTest()
             {
-                _upMigrations = new List<UpMigration>
+                _upMigrations = new List<UpScript>
                 {
-                    new UpMigration(10),
-                    new UpMigration(15),
-                    new UpMigration(52),
-                    new UpMigration(88)
+                    new UpScript(10),
+                    new UpScript(15),
+                    new UpScript(52),
+                    new UpScript(88)
                 };
 
                 _mockScriptFinder = new Mock<IScriptFinder>();
 
-                _mockScriptFinder.Setup(x => x.GetUpMigrations()).Returns(_upMigrations);
+                _mockScriptFinder.Setup(x => x.GetUpScripts()).Returns(_upMigrations);
             }
 
             [Test]
@@ -218,42 +229,43 @@ namespace Migrator.Tests
             }
         }
 
-        class GivenThereIsACompleteSetOfDownMigrations : GivenADatabaseWithMigrations
+        class GivenThereIsACompleteSetOfDownScripts : GivenADatabaseWithMigrations
         {
-            private List<DownMigration> _downMigrations;
+            private List<DownScript> _downScripts;
             private Mock<IScriptFinder> _mockScriptFinder;
             private MigrationService _migrationService;
 
             [SetUp]
             public new void BeforeEachTest()
             {
-                _downMigrations = new List<DownMigration>
+                _downScripts = new List<DownScript>
                 {
-                    new DownMigration(10),
-                    new DownMigration(52)
+                    new DownScript(10),
+                    new DownScript(52),
+                    new DownScript(96)
                 };
 
                 _mockScriptFinder = new Mock<IScriptFinder>();
 
-                _mockScriptFinder.Setup(x => x.GetDownMigrations()).Returns(_downMigrations.AsEnumerable());
+                _mockScriptFinder.Setup(x => x.GetDownScripts()).Returns(_downScripts.AsEnumerable());
 
                 _migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
             }
 
             [TestFixture]
-            public class WhenTellingTheMigrationServiceToPerformADownToZero : GivenThereIsACompleteSetOfDownMigrations
+            public class WhenTellingTheMigrationServiceToPerformADownToZero : GivenThereIsACompleteSetOfDownScripts
             {
                 [Test]
                 public void ShouldNotCommitIfThereWasAnExceptionWhenExecutingMigration()
                 {
                     // arrange
-                    _mockRunner.Setup(x => x.ExecuteDownMigration(It.IsAny<DownMigration>())).Throws<MigrationFailedException>();
+                    _mockRunner.Setup(x => x.ExecuteDownScript(It.IsAny<DownScript>())).Throws<MigrationFailedException>();
 
                     // act
                     try
                     {
-                        _migrationService.Down(0);
-                        Assert.Fail("Exception never occured");
+                        _migrationService.DownToZero();
+                        Assert.Fail();
                     }
                     catch (MigrationFailedException)
                     {
@@ -263,44 +275,76 @@ namespace Migrator.Tests
                 }
 
                 [Test]
-                public void ShouldExecuteAllDownMigrationsInDescendingOrder()
+                public void ShouldExecuteAllDownScriptsInDescendingOrder()
                 {
                     // arrange
-                    var lastVersionExecuted = long.MaxValue;
-
-                    _mockRunner.Setup(x => x.ExecuteDownMigration(It.IsAny<DownMigration>()))
-                        .Callback(new Action<DownMigration>(migration =>
-                        {
-                            Assert.Greater(lastVersionExecuted, migration.Version);
-                            lastVersionExecuted = migration.Version;
-                        }));
+                    EnsureDownScriptsExecutedInDescendingOrder();
 
                     // act
-                    _migrationService.Down(0);
+                    _migrationService.DownToZero();
 
                     // assert
-                    _mockRunner.Verify(x => x.ExecuteDownMigration(It.IsAny<DownMigration>()), Times.Exactly(2));
+                    _mockRunner.Verify(x => x.ExecuteDownScript(It.IsAny<DownScript>()), Times.Exactly(3));
                     _mockRunner.Verify(x => x.Commit(), Times.Once);
                 }
             }
 
             [TestFixture]
-            public class WhenTellingTheMigrationServiceToPerformADownToASpecificVersion : GivenThereIsACompleteSetOfDownMigrations
+            public class WhenTellingTheMigrationServiceToPerformADownToASpecificVersion : GivenThereIsACompleteSetOfDownScripts
             {
                 [Test]
-                public void ShouldThrowExceptionIfVersionDoesNotExist()
+                public void ShouldThrowExceptionIfVersionIsLessThanOne()
                 {
                     try
                     {
                         // act
-                        _migrationService.Down(15);
+                        _migrationService.DownToVersion(0);
                         Assert.Fail();
                     }
-                    catch (MigrationVersionNeverExecutedException)
+                    catch (ArgumentException e)
+                    {
+                        // assert
+                        Assert.AreEqual("version", e.ParamName);
+                    }
+                }
+
+
+                [Test]
+                public void ShouldThrowExceptionIfVersionRequestedDoesNotExist()
+                {
+                    try
+                    {
+                        // act
+                        _migrationService.DownToVersion(15);
+                        Assert.Fail();
+                    }
+                    catch (VersionNeverExecutedException)
                     {
                         // assert
                         Assert.Pass();
                     }
+                }
+
+                [Test]
+                public void ShouldExecuteAllDownMigrationsThatAreHigherThanRequestedVersionInDescendingOrder()
+                {
+                    // arrange
+                    const int requestedVersion = 10;
+
+                    EnsureDownScriptsExecutedInDescendingOrder();
+
+                    // act
+                    _migrationService.DownToVersion(requestedVersion);
+
+                    // assert
+                    foreach (var executedMigration in _executedMigrations)
+                    {
+                        var times = executedMigration > requestedVersion ? Times.Once() : Times.Never();
+                        var downMigration = _downScripts.Single(m => m.Version == executedMigration);
+                        _mockRunner.Verify(x => x.ExecuteDownScript(downMigration), times);
+                    }
+
+                    _mockRunner.Verify(x => x.Commit(), Times.Once);
                 }
             }
         }

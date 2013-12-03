@@ -1,8 +1,8 @@
 ﻿namespace Migrator
 {
-    public class UpMigration
+    public class UpScript
     {
-        public UpMigration(long version)
+        public UpScript(long version)
         {
             Version = version;
         }
