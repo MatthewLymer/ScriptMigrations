@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Migrator
@@ -16,9 +17,9 @@ namespace Migrator
 
         public void Up()
         {
-            var migrations = _scriptFinder.GetUpScripts();
+            var upScripts = _scriptFinder.GetUpScripts().ToList();
 
-            if (!migrations.Any())
+            if (!upScripts.Any())
             {
                 return;
             }
@@ -27,7 +28,7 @@ namespace Migrator
             {
                 var executedMigrations = runner.GetExecutedMigrations();
                 
-                foreach (var migration in migrations.Where(x => !executedMigrations.Contains(x.Version)).OrderBy(x => x.Version))
+                foreach (var migration in upScripts.Where(x => !executedMigrations.Contains(x.Version)).OrderBy(x => x.Version))
                 {
                     runner.ExecuteUpMigration(migration);
                 }
@@ -40,10 +41,7 @@ namespace Migrator
         {
             using (var runner = _runnerFactory.Create())
             {
-                foreach (var downMigration in _scriptFinder.GetDownScripts().OrderByDescending(m => m.Version))
-                {
-                    runner.ExecuteDownScript(downMigration);
-                }
+                RemoveMigrations(runner, runner.GetExecutedMigrations());
 
                 runner.Commit();
             }            
@@ -58,23 +56,33 @@ namespace Migrator
 
             using (var runner = _runnerFactory.Create())
             {
-                var executedMigrations = runner.GetExecutedMigrations();
+                var executedMigrations = runner.GetExecutedMigrations().ToList();
 
                 if (!executedMigrations.Contains(version))
                 {
                     throw new VersionNeverExecutedException();   
                 }
 
-                var downMigrations = _scriptFinder.GetDownScripts().ToList();
-
-                foreach (var executedMigration in executedMigrations.Where(m => m > version).OrderByDescending(m => m))
-                {
-                    var downMigration = downMigrations.SingleOrDefault(m => m.Version == executedMigration);
-
-                    runner.ExecuteDownScript(downMigration);
-                }
+                RemoveMigrations(runner, executedMigrations.Where(x => x > version));
 
                 runner.Commit();
+            }
+        }
+
+        private void RemoveMigrations(IRunner runner, IEnumerable<long> migrationsToRemove)
+        {
+            var downScripts = _scriptFinder.GetDownScripts().ToDictionary(x => x.Version);
+            
+            foreach (var executedMigration in migrationsToRemove.OrderByDescending(x => x))
+            {
+                DownScript downScript;
+
+                if (!downScripts.TryGetValue(executedMigration, out downScript))
+                {
+                    throw new MigrationScriptMissingException();
+                }
+
+                runner.ExecuteDownScript(downScript);
             }
         }
     }

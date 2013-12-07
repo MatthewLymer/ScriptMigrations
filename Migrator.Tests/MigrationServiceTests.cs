@@ -308,7 +308,6 @@ namespace Migrator.Tests
                     }
                 }
 
-
                 [Test]
                 public void ShouldThrowExceptionIfVersionRequestedDoesNotExist()
                 {
@@ -345,6 +344,69 @@ namespace Migrator.Tests
                     }
 
                     _mockRunner.Verify(x => x.Commit(), Times.Once);
+                }
+            }
+        }
+
+        class GivenThereIsAnIncompleteSetOfDownScripts : GivenADatabaseWithMigrations
+        {
+            private List<DownScript> _downScripts;
+            private Mock<IScriptFinder> _mockScriptFinder;
+            private MigrationService _migrationService;
+
+            [SetUp]
+            public new void BeforeEachTest()
+            {
+                _downScripts = new List<DownScript>
+                {
+                    new DownScript(10),
+                    new DownScript(96)
+                };
+
+                _mockScriptFinder = new Mock<IScriptFinder>();
+
+                _mockScriptFinder.Setup(x => x.GetDownScripts()).Returns(_downScripts.AsEnumerable());
+
+                _migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
+            }
+
+            [TestFixture]
+            public class WhenTellingTheMigrationServiceToPerformADownToZero : GivenThereIsAnIncompleteSetOfDownScripts
+            {
+                [Test]
+                public void ShouldThrowAnException()
+                {
+                    try
+                    {
+                        // act
+                        _migrationService.DownToZero();
+                        Assert.Fail();
+                    }
+                    catch (MigrationScriptMissingException)
+                    {
+                        // assert
+                        Assert.Pass();
+                    }
+                }
+            }
+
+            [TestFixture]
+            public class WhenTellingTheMigrationServiceToPerformADownToASpecificVersion : GivenThereIsAnIncompleteSetOfDownScripts
+            {
+                [Test]
+                public void ShouldThrowAnException()
+                {
+                    try
+                    {
+                        // act
+                        _migrationService.DownToVersion(10);
+                        Assert.Fail();
+                    }
+                    catch (MigrationScriptMissingException)
+                    {
+                        // assert
+                        Assert.Pass();
+                    }                    
                 }
             }
         }

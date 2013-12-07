@@ -44,6 +44,7 @@
     <Compile Include="IRunnerFactory.cs" />
     <Compile Include="IScriptFinder.cs" />
     <Compile Include="MigrationFailedException.cs" />
+    <Compile Include="MigrationScriptMissingException.cs" />
     <Compile Include="MigrationService.cs" />
     <Compile Include="VersionNeverExecutedException.cs" />
     <Compile Include="MissingDownMigrationException.cs" />
