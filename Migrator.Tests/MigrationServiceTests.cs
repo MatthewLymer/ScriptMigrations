@@ -50,7 +50,7 @@ namespace Migrator.Tests
             {
                 _mockScriptFinder = new Mock<IScriptFinder>();
 
-                _mockScriptFinder.Setup(x => x.GetUpScripts()).Returns(new[]{new UpScript(25)});
+                _mockScriptFinder.Setup(x => x.GetUpScripts()).Returns(new[]{new UpScript(25, "", "")});
             }
 
             [TestFixture]
@@ -118,9 +118,9 @@ namespace Migrator.Tests
             {
                 _upMigrations = new List<UpScript>
                 {
-                    new UpScript(25),
-                    new UpScript(45),
-                    new UpScript(13)
+                    new UpScript(25, "", ""),
+                    new UpScript(45, "", ""),
+                    new UpScript(13, "", "")
                 };
 
                 _mockScriptFinder = new Mock<IScriptFinder>();
@@ -199,10 +199,10 @@ namespace Migrator.Tests
             {
                 _upMigrations = new List<UpScript>
                 {
-                    new UpScript(10),
-                    new UpScript(15),
-                    new UpScript(52),
-                    new UpScript(88)
+                    new UpScript(10, "", ""),
+                    new UpScript(15, "", ""),
+                    new UpScript(52, "", ""),
+                    new UpScript(88, "", "")
                 };
 
                 _mockScriptFinder = new Mock<IScriptFinder>();
