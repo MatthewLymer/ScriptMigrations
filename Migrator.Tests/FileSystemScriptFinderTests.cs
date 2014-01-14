@@ -1,204 +1,135 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Moq;
 using NUnit.Framework;
 
 namespace Migrator.Tests
 {
-    class GivenAnEmptyDirectory
+    internal class FileSystemScriptFinderTests
     {
-        private FileSystemScriptFinder _scriptFinder;
-
-        [SetUp]
-        public void BeforeEachTest()
+        private class GivenAnEmptyDirectory
         {
-            const string path = ".";
+            private FileSystemScriptFinder _scriptFinder;
 
-            var mockFileSystemFacade = new Mock<IFileSystemFacade>();
-
-            mockFileSystemFacade.Setup(x => x.GetFiles(path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
-                .Returns(new string[0]);
-
-            _scriptFinder = new FileSystemScriptFinder(mockFileSystemFacade.Object, path);
-        }
-
-        [TestFixture]
-        public class WhenTellingTheFileSystemScriptFinderToFindUpScripts : GivenAnEmptyDirectory
-        {
-            [Test]
-            public void ShouldReturnAnEmptyEnumeration()
+            [SetUp]
+            public void BeforeEachTest()
             {
-                // act
-                var upScripts = _scriptFinder.GetUpScripts();
+                const string path = ".";
 
-                // assert
-                Assert.IsEmpty(upScripts);
-            }
-        }
-    }
+                var mockFileSystemFacade = new Mock<IFileSystemFacade>();
 
-    class GivenADirectoryWithASingleUpScript
-    {
-        private FileSystemScriptFinder _scriptFinder;
+                mockFileSystemFacade.Setup(
+                    x => x.GetFiles(path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                    .Returns(new string[0]);
 
-        private Mock<IFileSystemFacade> _mockFileSystemFacade;
-
-        private const long Version = 20150105235959;
-        private const string Name = "MyMigration";
-        private const string Content = "-- This is a migration";
-
-        [SetUp]
-        public void BeforeEachTest()
-        {
-            const string path = ".";
-            
-            _mockFileSystemFacade = new Mock<IFileSystemFacade>();
-            
-            var filePath = string.Format(@".\{0}_{1}_up.sql", Version, Name);
-
-            _mockFileSystemFacade.Setup(x => x.GetFiles(path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
-                .Returns(new[] { filePath });
-
-            _mockFileSystemFacade.Setup(x => x.ReadAllText(filePath)).Returns(Content);
-
-            _scriptFinder = new FileSystemScriptFinder(_mockFileSystemFacade.Object, path);
-        }
-
-        [TestFixture]
-        public class WhenTellingTheFileSystemScriptFinderToFindUpScripts : GivenADirectoryWithASingleUpScript
-        {
-            [Test] 
-            public void ShouldReturnASinglePopulatedUpMigration()
-            {
-                // act
-                var upScripts = _scriptFinder.GetUpScripts();
-
-                // assert
-                var upScript = upScripts.Single();
-
-                Assert.AreEqual(Version, upScript.Version);
-                Assert.AreEqual(Name, upScript.Name);
-                Assert.AreEqual(Content, upScript.Content);
-            }
-        }
-    }
-
-    class GivenADirectoryWithMultipleUpScripts
-    {
-        private const string TestPath = ".";
-
-        private string[] _upScriptPaths;
-
-        private FileSystemScriptFinder _scriptFinder;
-
-        private Mock<IFileSystemFacade> _mockFileSystemFacade;
-
-        [SetUp]
-        public void BeforeEachTest()
-        {
-            _mockFileSystemFacade = new Mock<IFileSystemFacade>();
-
-            _mockFileSystemFacade.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
-
-            _upScriptPaths = new[]
-            {
-                @".\20121212000000_MyScript_up.sql",
-                @".\20121212000001_MyScript_up.sql",
-                @".\20121212000002_MyScript_up.sql",
-            };
-
-            _mockFileSystemFacade.Setup(x => x.GetFiles(TestPath, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
-                .Returns(_upScriptPaths);
-
-            _scriptFinder = new FileSystemScriptFinder(_mockFileSystemFacade.Object, TestPath);
-        }
-
-        [TestFixture]
-        public class WhenTellingTheFileSystemScriptFinderToFindUpScripts : GivenADirectoryWithMultipleUpScripts
-        {
-            [Test]
-            public void ShouldReturnMultipleUpScripts()
-            {
-                // act
-                var upScripts = _scriptFinder.GetUpScripts();
-
-                // assert
-                Assert.AreEqual(3, upScripts.Count());
+                _scriptFinder = new FileSystemScriptFinder(mockFileSystemFacade.Object, path);
             }
 
-            [Test]
-            public void ShouldThrowExceptionIfMultipleUpScriptsHaveTheSameVersion()
+            [TestFixture]
+            public class WhenTellingTheFileSystemScriptFinderToFindUpScripts : GivenAnEmptyDirectory
             {
-                // arrange
-                _upScriptPaths[0] = @".\20000000000000_MyUpScriptA_up.sql";
-                _upScriptPaths[1] = @".\20000000000000_MyUpScriptB_up.sql";
-
-                try
+                [Test]
+                public void ShouldReturnAnEmptyEnumeration()
                 {
                     // act
-                    _scriptFinder.GetUpScripts();
-                    Assert.Fail();
-                }
-                catch (DuplicateScriptVersionException)
-                {
+                    var upScripts = _scriptFinder.GetUpScripts();
+
                     // assert
-                    Assert.Pass();
+                    Assert.IsEmpty(upScripts);
                 }
             }
         }
-    }
 
-    public class DuplicateScriptVersionException : Exception
-    {
-    }
-
-    public class FileSystemScriptFinder : IScriptFinder
-    {
-        public const string SqlFileSearchPattern = "*.sql";
-
-        private readonly IFileSystemFacade _fileSystemFacade;
-        private readonly string _path;
-
-        public FileSystemScriptFinder(IFileSystemFacade fileSystemFacade, string path)
+        private class GivenADirectoryWithASingleUpScript
         {
-            _fileSystemFacade = fileSystemFacade;
-            _path = path;
-        }
+            private FileSystemScriptFinder _scriptFinder;
 
-        public IEnumerable<UpScript> GetUpScripts()
-        {
-            var files = _fileSystemFacade.GetFiles(_path, SqlFileSearchPattern, SearchOption.AllDirectories);
+            private Mock<IFileSystemFacade> _mockFileSystemFacade;
 
-            var upScripts = new List<UpScript>();
+            private const long Version = 20150105235959;
+            private const string Name = "MyMigration";
+            private const string Content = "-- This is a migration";
 
-            foreach (var file in files)
+            [SetUp]
+            public void BeforeEachTest()
             {
-                var fileSegments = Path.GetFileNameWithoutExtension(file).Split('_');
+                const string path = ".";
 
-                var upScript = new UpScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
+                _mockFileSystemFacade = new Mock<IFileSystemFacade>();
 
-                upScripts.Add(upScript);
+                var filePath = string.Format(@".\{0}_{1}_up.sql", Version, Name);
+
+                _mockFileSystemFacade.Setup(
+                    x => x.GetFiles(path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                    .Returns(new[] {filePath});
+
+                _mockFileSystemFacade.Setup(x => x.ReadAllText(filePath)).Returns(Content);
+
+                _scriptFinder = new FileSystemScriptFinder(_mockFileSystemFacade.Object, path);
             }
 
-            if (upScripts.GroupBy(x => x.Version).Any(g => g.Count() > 1))
+            [TestFixture]
+            public class WhenTellingTheFileSystemScriptFinderToFindUpScripts : GivenADirectoryWithASingleUpScript
             {
-                throw new DuplicateScriptVersionException();
+                [Test]
+                public void ShouldReturnASinglePopulatedUpMigration()
+                {
+                    // act
+                    var upScripts = _scriptFinder.GetUpScripts();
+
+                    // assert
+                    var upScript = upScripts.Single();
+
+                    Assert.AreEqual(Version, upScript.Version);
+                    Assert.AreEqual(Name, upScript.Name);
+                    Assert.AreEqual(Content, upScript.Content);
+                }
+            }
+        }
+
+        private class GivenADirectoryWithMultipleUpScripts
+        {
+            private const string TestPath = ".";
+
+            private string[] _upScriptPaths;
+
+            private FileSystemScriptFinder _scriptFinder;
+
+            private Mock<IFileSystemFacade> _mockFileSystemFacade;
+
+            [SetUp]
+            public void BeforeEachTest()
+            {
+                _mockFileSystemFacade = new Mock<IFileSystemFacade>();
+
+                _mockFileSystemFacade.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
+
+                _upScriptPaths = new[] {
+                    @".\20121212000000_MyScript_up.sql",
+                    @".\20121212000001_MyScript_up.sql",
+                    @".\20121212000002_MyScript_up.sql",
+                };
+
+                _mockFileSystemFacade.Setup(
+                    x => x.GetFiles(TestPath, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                    .Returns(_upScriptPaths);
+
+                _scriptFinder = new FileSystemScriptFinder(_mockFileSystemFacade.Object, TestPath);
             }
 
-            return upScripts;
-        }
+            [TestFixture]
+            public class WhenTellingTheFileSystemScriptFinderToFindUpScripts : GivenADirectoryWithMultipleUpScripts
+            {
+                [Test]
+                public void ShouldReturnMultipleUpScripts()
+                {
+                    // act
+                    var upScripts = _scriptFinder.GetUpScripts();
 
-        public IEnumerable<DownScript> GetDownScripts()
-        {
-            throw new NotImplementedException();
+                    // assert
+                    Assert.AreEqual(3, upScripts.Count());
+                }
+            }
         }
-    }
-
-    public interface IFileSystemFacade
-    {
-        string[] GetFiles(string path, string searchPattern, SearchOption searchOption);
-        string ReadAllText(string path);
     }
 }

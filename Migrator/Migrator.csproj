@@ -40,6 +40,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DownScript.cs" />
+    <Compile Include="FileSystemScriptFinder.cs" />
+    <Compile Include="IFileSystemFacade.cs" />
     <Compile Include="IRunner.cs" />
     <Compile Include="IRunnerFactory.cs" />
     <Compile Include="IScriptFinder.cs" />
