@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DownScript.cs" />
+    <Compile Include="DuplicateMigrationVersionException.cs" />
     <Compile Include="FileSystemScriptFinder.cs" />
     <Compile Include="IFileSystemFacade.cs" />
     <Compile Include="IRunner.cs" />

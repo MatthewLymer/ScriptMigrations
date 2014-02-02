@@ -17,8 +17,8 @@ namespace Migrator
 
         public void Up()
         {
-            var upScripts = _scriptFinder.GetUpScripts().ToList();
-
+            var upScripts = GetAndVerifyUpScripts();
+            
             if (!upScripts.Any())
             {
                 return;
@@ -27,8 +27,8 @@ namespace Migrator
             using (var runner = _runnerFactory.Create())
             {
                 var executedMigrations = runner.GetExecutedMigrations();
-                
-                foreach (var migration in upScripts.Where(x => !executedMigrations.Contains(x.Version)).OrderBy(x => x.Version))
+
+                foreach (var migration in ExcludeExecutedUpScripts(upScripts, executedMigrations).OrderBy(x => x.Version))
                 {
                     runner.ExecuteUpMigration(migration);
                 }
@@ -39,12 +39,7 @@ namespace Migrator
 
         public void DownToZero()
         {
-            using (var runner = _runnerFactory.Create())
-            {
-                RemoveMigrations(runner, runner.GetExecutedMigrations());
-
-                runner.Commit();
-            }            
+            PerformDown(0);
         }
 
         public void DownToVersion(long version)
@@ -54,14 +49,28 @@ namespace Migrator
                 throw new ArgumentOutOfRangeException("version");
             }
 
+            PerformDown(version);
+        }
+
+        private List<UpScript> GetAndVerifyUpScripts()
+        {
+            var upScripts = _scriptFinder.GetUpScripts().ToList();
+
+            if (upScripts.GroupBy(u => u.Version).Any(g => g.Count() > 1))
+            {
+                throw new DuplicateMigrationVersionException();
+            }
+
+            return upScripts;
+        }
+
+        private void PerformDown(long version)
+        {
             using (var runner = _runnerFactory.Create())
             {
                 var executedMigrations = runner.GetExecutedMigrations().ToList();
 
-                if (!executedMigrations.Contains(version))
-                {
-                    throw new VersionNeverExecutedException();   
-                }
+                ValidateRequestedDownVersion(version, executedMigrations);
 
                 RemoveMigrations(runner, executedMigrations.Where(x => x > version));
 
@@ -69,14 +78,39 @@ namespace Migrator
             }
         }
 
+        private List<DownScript> GetAndVerifyDownScripts()
+        {
+            var downScripts = _scriptFinder.GetDownScripts().ToList();
+
+            if (downScripts.GroupBy(u => u.Version).Any(g => g.Count() > 1))
+            {
+                throw new DuplicateMigrationVersionException();
+            }
+
+            return downScripts;
+        }
+
+        private static void ValidateRequestedDownVersion(long version, List<long> executedMigrations)
+        {
+            if (version != 0 && !executedMigrations.Contains(version))
+            {
+                throw new VersionNeverExecutedException();
+            }
+        }
+
+        private static IEnumerable<UpScript> ExcludeExecutedUpScripts(IEnumerable<UpScript> upScripts, IEnumerable<long> executedMigrations)
+        {
+            return upScripts.Where(x => !executedMigrations.Contains(x.Version));
+        }
+
         private void RemoveMigrations(IRunner runner, IEnumerable<long> migrationsToRemove)
         {
-            var downScripts = _scriptFinder.GetDownScripts().ToDictionary(x => x.Version);
+            var downScripts = GetAndVerifyDownScripts().ToDictionary(x => x.Version);
             
             foreach (var executedMigration in migrationsToRemove.OrderByDescending(x => x))
             {
                 DownScript downScript;
-
+                
                 if (!downScripts.TryGetValue(executedMigration, out downScript))
                 {
                     throw new MigrationScriptMissingException();
