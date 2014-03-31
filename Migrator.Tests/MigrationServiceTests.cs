@@ -100,7 +100,7 @@ namespace Migrator.Tests
                         try
                         {
                             migrationService.Up();
-                            Assert.Fail("Exception never occured");
+                            Assert.Fail();
                         }
                         catch (MigrationFailedException)
                         {
@@ -133,6 +133,35 @@ namespace Migrator.Tests
                 [TestFixture]
                 public class WhenTellingTheUpMigrationServiceToPerformAnUp : GivenThereAreMultipleUpScripts
                 {
+                    private MigrationService _migrationService;
+
+                    [SetUp]
+                    public new void BeforeEachTest()
+                    {
+                        _migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
+                    }
+
+                    [Test]
+                    public void ShouldThrowExceptionIfMultipleMigrationScriptsHaveTheSameVersion()
+                    {
+                        // arrange
+                        var duplicatedUpScript = new UpScript(666, "", "");
+                        _upMigrations.Add(duplicatedUpScript);
+                        _upMigrations.Add(duplicatedUpScript);
+
+                        try
+                        {
+                            // act
+                            _migrationService.Up();
+                            Assert.Fail();
+                        }
+                        catch (DuplicateMigrationVersionException)
+                        {
+                            // assert
+                            Assert.Pass();
+                        }
+                    }
+
                     [Test]
                     public void ShouldRunAllMigrationsInAscendingOrder()
                     {
@@ -145,10 +174,8 @@ namespace Migrator.Tests
                                 lastVersionExecuted = migration.Version;
                             }));
 
-                        var migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
-
                         // act
-                        migrationService.Up();
+                        _migrationService.Up();
 
                         // assert
                         _mockRunner.Verify(x => x.ExecuteUpScript(It.IsAny<UpScript>()), Times.Exactly(3));
@@ -290,8 +317,7 @@ namespace Migrator.Tests
                 }
 
                 [TestFixture]
-                public class WhenTellingTheMigrationServiceToPerformADownToASpecificVersion :
-                    GivenThereIsACompleteSetOfDownScripts
+                public class WhenTellingTheMigrationServiceToPerformADownToASpecificVersion : GivenThereIsACompleteSetOfDownScripts
                 {
                     [Test]
                     public void ShouldThrowExceptionIfVersionIsLessThanOne()
@@ -371,8 +397,7 @@ namespace Migrator.Tests
                 }
 
                 [TestFixture]
-                public class WhenTellingTheMigrationServiceToPerformADownToZero :
-                    GivenThereIsAnIncompleteSetOfDownScripts
+                public class WhenTellingTheMigrationServiceToPerformADownToZero : GivenThereIsAnIncompleteSetOfDownScripts
                 {
                     [Test]
                     public void ShouldThrowAnException()
@@ -389,11 +414,31 @@ namespace Migrator.Tests
                             Assert.Pass();
                         }
                     }
+
+                    [Test]
+                    public void ShouldThrowExceptionIfMultipleMigrationScriptsHaveTheSameVersion()
+                    {
+                        // arrange
+                        var duplicatedDownScript = new DownScript(666);
+                        _downScripts.Add(duplicatedDownScript);
+                        _downScripts.Add(duplicatedDownScript);
+
+                        try
+                        {
+                            // act
+                            _migrationService.DownToZero();
+                            Assert.Fail();
+                        }
+                        catch (DuplicateMigrationVersionException)
+                        {
+                            // assert
+                            Assert.Pass();
+                        }
+                    }
                 }
 
                 [TestFixture]
-                public class WhenTellingTheMigrationServiceToPerformADownToASpecificVersion :
-                    GivenThereIsAnIncompleteSetOfDownScripts
+                public class WhenTellingTheMigrationServiceToPerformADownToASpecificVersion : GivenThereIsAnIncompleteSetOfDownScripts
                 {
                     [Test]
                     public void ShouldThrowAnException()
