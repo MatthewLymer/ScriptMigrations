@@ -419,7 +419,7 @@ namespace Migrator.Tests
                     public void ShouldThrowExceptionIfMultipleMigrationScriptsHaveTheSameVersion()
                     {
                         // arrange
-                        var duplicatedDownScript = new DownScript(666);
+                        var duplicatedDownScript = new DownScript(666, "", "");
                         _downScripts.Add(duplicatedDownScript);
                         _downScripts.Add(duplicatedDownScript);
 
