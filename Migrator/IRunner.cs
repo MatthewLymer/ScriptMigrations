@@ -6,7 +6,7 @@ namespace Migrator
     public interface IRunner : IDisposable
     {
         void Commit();
-        void ExecuteUpMigration(UpScript script);
+        void ExecuteUpScript(UpScript script);
         void ExecuteDownScript(DownScript script);
         IEnumerable<long> GetExecutedMigrations();
     }

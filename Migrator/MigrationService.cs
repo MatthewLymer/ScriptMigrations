@@ -30,7 +30,7 @@ namespace Migrator
                 
                 foreach (var migration in upScripts.Where(x => !executedMigrations.Contains(x.Version)).OrderBy(x => x.Version))
                 {
-                    runner.ExecuteUpMigration(migration);
+                    runner.ExecuteUpScript(migration);
                 }
 
                 runner.Commit();

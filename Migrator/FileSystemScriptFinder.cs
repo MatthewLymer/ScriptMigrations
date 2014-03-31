@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace Migrator
 {
@@ -21,23 +24,60 @@ namespace Migrator
         {
             var files = _fileSystemFacade.GetFiles(_path, SqlFileSearchPattern, SearchOption.AllDirectories);
 
-            var upScripts = new List<UpScript>();
-
+            var scripts = new List<UpScript>();
+            
             foreach (var file in files)
             {
-                var fileSegments = Path.GetFileNameWithoutExtension(file).Split('_');
+                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
 
-                var upScript = new UpScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
+                if (fileNameWithoutExtension == null)
+                {
+                    continue;
+                }
 
-                upScripts.Add(upScript);
+                if (!Regex.IsMatch(fileNameWithoutExtension, @"^\d{14}_(.+)_up$", RegexOptions.IgnoreCase))
+                {
+                    continue;
+                }
+
+                var fileSegments = fileNameWithoutExtension.Split('_');
+                
+                var script = new UpScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
+
+                scripts.Add(script);
             }
 
-            return upScripts;
+            return scripts;
         }
 
         public IEnumerable<DownScript> GetDownScripts()
         {
-            throw new NotImplementedException();
+            var files = _fileSystemFacade.GetFiles(_path, SqlFileSearchPattern, SearchOption.AllDirectories);
+
+            var scripts = new List<DownScript>();
+
+            foreach (var file in files)
+            {
+                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+
+                if (fileNameWithoutExtension == null)
+                {
+                    continue;
+                }
+
+                if (!Regex.IsMatch(fileNameWithoutExtension, @"^\d{14}_(.+)_down$", RegexOptions.IgnoreCase))
+                {
+                    continue;
+                }
+
+                var fileSegments = fileNameWithoutExtension.Split('_');
+
+                var script = new DownScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
+
+                scripts.Add(script);
+            }
+
+            return scripts;
         }
     }
 }

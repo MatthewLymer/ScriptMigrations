@@ -22,10 +22,10 @@ namespace Migrator.Tests
                 _mockRunnerFactory.Setup(x => x.Create()).Returns(_mockRunner.Object);
             }
 
-            private class GivenThereIsNoUpMigrationToRun : GivenAnEmptyDatabase
+            private class GivenThereAreNoUpScripts : GivenAnEmptyDatabase
             {
                 [TestFixture]
-                public class WhenTellingTheUpMigrationServiceToPerformAnUp : GivenThereIsNoUpMigrationToRun
+                public class WhenTellingTheUpMigrationServiceToPerformAnUp : GivenThereAreNoUpScripts
                 {
                     [Test]
                     public void ShouldNotCreateInstanceOfRunner()
@@ -73,7 +73,7 @@ namespace Migrator.Tests
                         _migrationService.Up();
 
                         // assert
-                        _mockRunner.Verify(x => x.ExecuteUpMigration(It.IsAny<UpScript>()), Times.Once);
+                        _mockRunner.Verify(x => x.ExecuteUpScript(It.IsAny<UpScript>()), Times.Once);
                         _mockRunner.Verify(x => x.Commit(), Times.Once);
                     }
 
@@ -93,7 +93,7 @@ namespace Migrator.Tests
                         // arrange
                         var migrationService = new MigrationService(_mockScriptFinder.Object, _mockRunnerFactory.Object);
 
-                        _mockRunner.Setup(x => x.ExecuteUpMigration(It.IsAny<UpScript>()))
+                        _mockRunner.Setup(x => x.ExecuteUpScript(It.IsAny<UpScript>()))
                             .Throws<MigrationFailedException>();
 
                         // act
@@ -111,7 +111,7 @@ namespace Migrator.Tests
                 }
             }
 
-            private class GivenThereAreMultipleUpMigrations : GivenAnEmptyDatabase
+            private class GivenThereAreMultipleUpScripts : GivenAnEmptyDatabase
             {
                 private Mock<IScriptFinder> _mockScriptFinder;
                 private List<UpScript> _upMigrations;
@@ -131,7 +131,7 @@ namespace Migrator.Tests
                 }
 
                 [TestFixture]
-                public class WhenTellingTheUpMigrationServiceToPerformAnUp : GivenThereAreMultipleUpMigrations
+                public class WhenTellingTheUpMigrationServiceToPerformAnUp : GivenThereAreMultipleUpScripts
                 {
                     [Test]
                     public void ShouldRunAllMigrationsInAscendingOrder()
@@ -139,7 +139,7 @@ namespace Migrator.Tests
                         // arrange
                         long lastVersionExecuted = 0;
 
-                        _mockRunner.Setup(x => x.ExecuteUpMigration(It.IsAny<UpScript>()))
+                        _mockRunner.Setup(x => x.ExecuteUpScript(It.IsAny<UpScript>()))
                             .Callback(new Action<UpScript>(migration => {
                                 Assert.Less(lastVersionExecuted, migration.Version);
                                 lastVersionExecuted = migration.Version;
@@ -151,7 +151,7 @@ namespace Migrator.Tests
                         migrationService.Up();
 
                         // assert
-                        _mockRunner.Verify(x => x.ExecuteUpMigration(It.IsAny<UpScript>()), Times.Exactly(3));
+                        _mockRunner.Verify(x => x.ExecuteUpScript(It.IsAny<UpScript>()), Times.Exactly(3));
                         _mockRunner.Verify(x => x.Commit(), Times.Once);
                     }
                 }
@@ -224,7 +224,7 @@ namespace Migrator.Tests
                     {
                         var migration = mig;
                         var times = _executedMigrations.Contains(migration.Version) ? Times.Never() : Times.Once();
-                        _mockRunner.Verify(x => x.ExecuteUpMigration(migration), times);
+                        _mockRunner.Verify(x => x.ExecuteUpScript(migration), times);
                     }
                 }
             }
@@ -239,9 +239,9 @@ namespace Migrator.Tests
                 public new void BeforeEachTest()
                 {
                     _downScripts = new List<DownScript> {
-                        new DownScript(10),
-                        new DownScript(52),
-                        new DownScript(96)
+                        new DownScript(10, "", ""),
+                        new DownScript(52, "", ""),
+                        new DownScript(96, "", "")
                     };
 
                     _mockScriptFinder = new Mock<IScriptFinder>();
@@ -359,8 +359,8 @@ namespace Migrator.Tests
                 public new void BeforeEachTest()
                 {
                     _downScripts = new List<DownScript> {
-                        new DownScript(10),
-                        new DownScript(96)
+                        new DownScript(10, "", ""),
+                        new DownScript(96, "", "")
                     };
 
                     _mockScriptFinder = new Mock<IScriptFinder>();
