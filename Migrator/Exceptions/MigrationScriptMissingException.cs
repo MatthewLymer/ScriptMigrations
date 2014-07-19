@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Migrator
+namespace Migrator.Exceptions
 {
     public class MigrationScriptMissingException : Exception
     {

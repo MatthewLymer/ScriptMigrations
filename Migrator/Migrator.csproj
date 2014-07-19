@@ -39,20 +39,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DownScript.cs" />
-    <Compile Include="DuplicateMigrationVersionException.cs" />
-    <Compile Include="FileSystemScriptFinder.cs" />
-    <Compile Include="IFileSystemFacade.cs" />
-    <Compile Include="IRunner.cs" />
-    <Compile Include="IRunnerFactory.cs" />
-    <Compile Include="IScriptFinder.cs" />
-    <Compile Include="MigrationFailedException.cs" />
-    <Compile Include="MigrationScriptMissingException.cs" />
+    <Compile Include="Scripts\DownScript.cs" />
+    <Compile Include="Exceptions\DuplicateMigrationVersionException.cs" />
+    <Compile Include="Scripts\FileSystemScriptFinder.cs" />
+    <Compile Include="Facades\IFileSystemFacade.cs" />
+    <Compile Include="Runners\IRunner.cs" />
+    <Compile Include="Runners\IRunnerFactory.cs" />
+    <Compile Include="Scripts\IScriptFinder.cs" />
+    <Compile Include="Exceptions\MigrationFailedException.cs" />
+    <Compile Include="Exceptions\MigrationScriptMissingException.cs" />
     <Compile Include="MigrationService.cs" />
-    <Compile Include="VersionNeverExecutedException.cs" />
-    <Compile Include="MissingDownMigrationException.cs" />
+    <Compile Include="Exceptions\VersionNeverExecutedException.cs" />
+    <Compile Include="Exceptions\MissingDownMigrationException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UpScript.cs" />
+    <Compile Include="Scripts\UpScript.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

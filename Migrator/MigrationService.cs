@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Migrator.Exceptions;
+using Migrator.Runners;
+using Migrator.Scripts;
 
 namespace Migrator
 {
@@ -78,7 +81,7 @@ namespace Migrator
             }
         }
 
-        private List<DownScript> GetAndVerifyDownScripts()
+        private IEnumerable<DownScript> GetAndVerifyDownScripts()
         {
             var downScripts = _scriptFinder.GetDownScripts().ToList();
 

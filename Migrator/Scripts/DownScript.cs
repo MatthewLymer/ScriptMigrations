@@ -1,4 +1,4 @@
-﻿namespace Migrator
+﻿namespace Migrator.Scripts
 {
     public class DownScript
     {

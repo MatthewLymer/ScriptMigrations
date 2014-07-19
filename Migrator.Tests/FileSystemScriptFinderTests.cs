@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Migrator.Facades;
+using Migrator.Scripts;
 using Moq;
 using NUnit.Framework;
 

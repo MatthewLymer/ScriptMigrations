@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
+using Migrator.Facades;
 
-namespace Migrator
+namespace Migrator.Scripts
 {
     public class FileSystemScriptFinder : IScriptFinder
     {
         public const string SqlFileSearchPattern = "*.sql";
+
+        private static readonly Regex UpScriptRegex = new Regex(@"^\d{14}_(.+)_up$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex DownScriptRegex = new Regex(@"^\d{14}_(.+)_down$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private readonly IFileSystemFacade _fileSystemFacade;
         private readonly string _path;
@@ -28,14 +29,14 @@ namespace Migrator
             
             foreach (var file in files)
             {
-                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
 
                 if (fileNameWithoutExtension == null)
                 {
                     continue;
                 }
 
-                if (!Regex.IsMatch(fileNameWithoutExtension, @"^\d{14}_(.+)_up$", RegexOptions.IgnoreCase))
+                if (!UpScriptRegex.IsMatch(fileNameWithoutExtension))
                 {
                     continue;
                 }
@@ -65,7 +66,7 @@ namespace Migrator
                     continue;
                 }
 
-                if (!Regex.IsMatch(fileNameWithoutExtension, @"^\d{14}_(.+)_down$", RegexOptions.IgnoreCase))
+                if (!DownScriptRegex.IsMatch(fileNameWithoutExtension))
                 {
                     continue;
                 }

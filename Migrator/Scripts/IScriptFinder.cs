@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Migrator
+namespace Migrator.Scripts
 {
     public interface IScriptFinder
     {

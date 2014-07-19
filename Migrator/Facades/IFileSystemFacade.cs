@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Migrator
+namespace Migrator.Facades
 {
     public interface IFileSystemFacade
     {

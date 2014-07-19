@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Migrator.Scripts;
 
-namespace Migrator
+namespace Migrator.Runners
 {
     public interface IRunner : IDisposable
     {
