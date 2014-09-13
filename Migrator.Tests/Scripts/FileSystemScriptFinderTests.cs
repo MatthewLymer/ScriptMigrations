@@ -6,7 +6,7 @@ using Migrator.Scripts;
 using Moq;
 using NUnit.Framework;
 
-namespace Migrator.Tests
+namespace Migrator.Tests.Scripts
 {
     internal class FileSystemScriptFinderTests
     {

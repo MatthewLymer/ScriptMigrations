@@ -1,6 +1,6 @@
 ﻿namespace Migrator.Scripts
 {
-    public class DownScript
+    public sealed class DownScript
     {
         public DownScript(long version, string name, string content)
         {

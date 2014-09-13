@@ -7,7 +7,7 @@ using Migrator.Scripts;
 
 namespace Migrator
 {
-    public class MigrationService
+    public sealed class MigrationService : IMigrationService
     {
         private readonly IScriptFinder _scriptFinder;
         private readonly IRunnerFactory _runnerFactory;
@@ -73,7 +73,10 @@ namespace Migrator
             {
                 var executedMigrations = runner.GetExecutedMigrations().ToList();
 
-                ValidateRequestedDownVersion(version, executedMigrations);
+                if (version > 0 && !executedMigrations.Contains(version))
+                {
+                    throw new VersionNeverExecutedException();
+                }
 
                 RemoveMigrations(runner, executedMigrations.Where(x => x > version));
 
@@ -91,14 +94,6 @@ namespace Migrator
             }
 
             return downScripts;
-        }
-
-        private static void ValidateRequestedDownVersion(long version, List<long> executedMigrations)
-        {
-            if (version != 0 && !executedMigrations.Contains(version))
-            {
-                throw new VersionNeverExecutedException();
-            }
         }
 
         private static IEnumerable<UpScript> ExcludeExecutedUpScripts(IEnumerable<UpScript> upScripts, IEnumerable<long> executedMigrations)

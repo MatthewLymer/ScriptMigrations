@@ -1,6 +1,6 @@
 ﻿namespace Migrator.Scripts
 {
-    public class UpScript
+    public sealed class UpScript
     {
         public UpScript(long version, string name, string content)
         {

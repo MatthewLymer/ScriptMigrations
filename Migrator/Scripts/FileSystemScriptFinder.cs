@@ -5,7 +5,7 @@ using Migrator.Facades;
 
 namespace Migrator.Scripts
 {
-    public class FileSystemScriptFinder : IScriptFinder
+    public sealed class FileSystemScriptFinder : IScriptFinder
     {
         public const string SqlFileSearchPattern = "*.sql";
 

@@ -4,6 +4,5 @@ namespace Migrator.Exceptions
 {
     public class DuplicateMigrationVersionException : Exception
     {
-
     }
 }

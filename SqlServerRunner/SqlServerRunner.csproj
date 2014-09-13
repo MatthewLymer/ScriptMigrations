@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</ProjectGuid>
+    <ProjectGuid>{B055C78E-B031-4CB2-963D-155BCEBD1958}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Migrator</RootNamespace>
-    <AssemblyName>Migrator</AssemblyName>
+    <RootNamespace>SqlServerRunner</RootNamespace>
+    <AssemblyName>SqlServerRunner</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,28 +32,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IMigrationService.cs" />
-    <Compile Include="Scripts\DownScript.cs" />
-    <Compile Include="Exceptions\DuplicateMigrationVersionException.cs" />
-    <Compile Include="Scripts\FileSystemScriptFinder.cs" />
-    <Compile Include="Facades\IFileSystemFacade.cs" />
-    <Compile Include="Runners\IRunner.cs" />
-    <Compile Include="Runners\IRunnerFactory.cs" />
-    <Compile Include="Scripts\IScriptFinder.cs" />
-    <Compile Include="Exceptions\MigrationFailedException.cs" />
-    <Compile Include="Exceptions\MigrationScriptMissingException.cs" />
-    <Compile Include="MigrationService.cs" />
-    <Compile Include="Exceptions\VersionNeverExecutedException.cs" />
-    <Compile Include="Exceptions\MissingDownMigrationException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scripts\UpScript.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
