@@ -16,6 +16,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerRunner", "SqlServe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerRunner.Tests", "SqlServerRunner.Tests\SqlServerRunner.Tests.csproj", "{77244B97-E8EF-4B0D-B7C3-2C0C25C2987D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigratorConsole", "MigratorConsole\MigratorConsole.csproj", "{21889C3D-D9C4-40D6-A4E4-971735D19EE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigratorConsole.Tests", "MigratorConsole.Tests\MigratorConsole.Tests.csproj", "{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +42,14 @@ Global
 		{77244B97-E8EF-4B0D-B7C3-2C0C25C2987D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77244B97-E8EF-4B0D-B7C3-2C0C25C2987D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77244B97-E8EF-4B0D-B7C3-2C0C25C2987D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21889C3D-D9C4-40D6-A4E4-971735D19EE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21889C3D-D9C4-40D6-A4E4-971735D19EE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21889C3D-D9C4-40D6-A4E4-971735D19EE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21889C3D-D9C4-40D6-A4E4-971735D19EE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

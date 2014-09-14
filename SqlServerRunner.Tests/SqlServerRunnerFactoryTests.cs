@@ -18,6 +18,7 @@ namespace SqlServerRunner.Tests
             }
 
             [Test]
+            [Ignore]
             [TestCase(null)]
             [TestCase("")]
             [TestCase("    ")]
