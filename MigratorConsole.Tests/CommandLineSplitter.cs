@@ -13,6 +13,7 @@ namespace MigratorConsole.Tests
         {
             int argc;
             var argv = CommandLineToArgvW(commandLine, out argc);
+
             if (argv == IntPtr.Zero)
             {
                 throw new Win32Exception();

@@ -9,11 +9,9 @@ namespace MigratorConsole.Tests
         {
             private static MigratorCommandLineParserResult ParseCommandLine(string commandLine)
             {
-                var parser = new MigratorCommandLineParser();
-
                 var args = CommandLineSplitter.CommandLineToArgs("foo.exe " + commandLine);
 
-                return parser.Parse(args);
+                return new MigratorCommandLineParser().Parse<MigratorCommandLineParserResult>(args);
             }
 
             [Test]
@@ -27,12 +25,10 @@ namespace MigratorConsole.Tests
                 Assert.IsNull(result.Version);
                 Assert.IsNull(result.RunnerQualifiedName);
                 Assert.IsNull(result.ScriptsPath);
+                Assert.IsNull(result.ConnectionString);
             }
             
             [Test]
-            [TestCase("/help", true)]
-            [TestCase("/HeLP", true)]
-            [TestCase("/h", true)]
             [TestCase("/?", true)]
             public void ShouldHaveShowHelpPropertySetIfRequested(string commandLine, bool shouldShowHelp)
             {
@@ -75,7 +71,7 @@ namespace MigratorConsole.Tests
             }
 
             [Test]
-            [TestCase("/runner=\"Namespace.Type, AssemblyName\"", "Namespace.Type, AssemblyName")]
+            [TestCase(@"/runner=""Namespace.Type, AssemblyName""", "Namespace.Type, AssemblyName")]
             [TestCase("/RUNNER=Namespace.Type,AssemblyName", "Namespace.Type,AssemblyName")]
             public void ShouldHaveRunnerQualifiedNamePropertySetIfRequested(string commandLine, string expectedRunnerQualifiedName)
             {
@@ -86,12 +82,22 @@ namespace MigratorConsole.Tests
 
             [Test]
             [TestCase("/scripts=folder", "folder")]
-            [TestCase("/SCRIPTS=\"C:\\Program Files\\folder\"", @"C:\Program Files\folder")]
+            [TestCase(@"/SCRIPTS=""C:\Program Files\folder""", @"C:\Program Files\folder")]
             public void ShouldHaveScriptsPathPropertySetIfRequested(string commandLine, string expectedScriptsPath)
             {
                 var result = ParseCommandLine(commandLine);
 
                 Assert.AreEqual(expectedScriptsPath, result.ScriptsPath);
+            }
+
+            [Test]
+            [TestCase(@"/CoNnectiONSTRing=""My Connection String""", "My Connection String")]
+            [TestCase(@"/connectionstring=Server=a;Database=b;Trusted_Connection=c;", "Server=a;Database=b;Trusted_Connection=c;")]
+            public void ShouldHaveConnectionStringPropertySetIfRequested(string commandLine, string expectedConnectionString)
+            {
+                var result = ParseCommandLine(commandLine);
+
+                Assert.AreEqual(expectedConnectionString, result.ConnectionString);
             }
         }
     }

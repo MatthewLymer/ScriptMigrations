@@ -1,87 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace MigratorConsole
 {
     public class MigratorCommandLineParser
     {
-        private static readonly string[] HelpFlags = {
-            "/help",
-            "/h",
-            "/?"
-        };
-
-        private static readonly Regex VersionRegex = 
-            new Regex(@"^/version=([0-9]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        private static readonly Regex RunnerQualifiedNameRegex = 
-            new Regex("^/runner=(.+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        private static readonly Regex ScriptsPathRegex =
-            new Regex("^/scripts=(.+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        public MigratorCommandLineParserResult Parse(ICollection<string> args)
+        public T Parse<T>(ICollection<string> args) where T : new()
         {
-            return new MigratorCommandLineParserResult
+            var obj = new T();
+
+            var items = typeof (T).GetProperties()
+                .Select(p => new {Property = p, Attributes = p.GetCustomAttributes(typeof (CommandLineAliasAttribute), true)})
+                .Where(p => p.Attributes.Length == 1)
+                .Select(p => new {p.Property, Attribute = (CommandLineAliasAttribute) p.Attributes.First()});
+
+            foreach (var item in items)
             {
-                ShowHelp = ShouldShowHelp(args),
-                MigrateUp = ShouldMigrateUp(args),
-                MigrateDown = ShouldMigrateDown(args),
-                Version = ReadVersion(args),
-                RunnerQualifiedName = ReadRunnerQualifiedName(args),
-                ScriptsPath = ReadScriptsPath(args)
-            };
-        }
+                string alias = item.Attribute.Alias;
+                var property = item.Property;
 
-        private static bool ShouldShowHelp(IEnumerable<string> args)
-        {
-            return HelpFlags.Any(hf => args.Any(a => hf.Equals(a, StringComparison.OrdinalIgnoreCase)));
-        }
+                if (property.PropertyType.IsAssignableFrom(typeof (bool)))
+                {
+                    var found = args.Any(a => ("/" + alias).Equals(a, StringComparison.OrdinalIgnoreCase));
+                    property.SetValue(obj, found, null);
+                }
+                else
+                {
+                    var converter = TypeDescriptor.GetConverter(property.PropertyType);
 
-        private static bool ShouldMigrateUp(IEnumerable<string> args)
-        {
-            return args.Any(arg => "/command=up".Equals(arg, StringComparison.OrdinalIgnoreCase));
-        }
+                    var escapedPropertyName = Regex.Escape(alias);
 
-        private static bool ShouldMigrateDown(IEnumerable<string> args)
-        {
-            return args.Any(arg => "/command=down".Equals(arg, StringComparison.OrdinalIgnoreCase));
-        }
+                    var regex = new Regex("/" + escapedPropertyName + "=(.+)", RegexOptions.IgnoreCase);
 
-        private static long? ReadVersion(IEnumerable<string> args)
-        {
-            var match = args.Select(arg => VersionRegex.Match(arg)).FirstOrDefault(m => m.Success);
+                    var match = args.Select(arg => regex.Match(arg)).FirstOrDefault(m => m.Success);
 
-            if (match == null)
-            {
-                return null;
+                    if (match == null)
+                    {
+                        continue;
+                    }
+
+                    var value = converter.ConvertFromInvariantString(match.Groups[1].Value);
+
+                    property.SetValue(obj, value, null);
+                }
             }
 
-            var captureValue = match.Groups[1].Value;
-
-            long version;
-            if (long.TryParse(captureValue, out version))
-            {
-                return version;
-            }
-
-            return null;
-        }
-
-        private static string ReadRunnerQualifiedName(IEnumerable<string> args)
-        {
-            var match = args.Select(arg => RunnerQualifiedNameRegex.Match(arg)).FirstOrDefault(m => m.Success);
-
-            return match == null ? null : match.Groups[1].Value;
-        }
-
-        private static string ReadScriptsPath(IEnumerable<string> args)
-        {
-            var match = args.Select(arg => ScriptsPathRegex.Match(arg)).FirstOrDefault(m => m.Success);
-
-            return match == null ? null : match.Groups[1].Value;
+            return obj;
         }
     }
 }
