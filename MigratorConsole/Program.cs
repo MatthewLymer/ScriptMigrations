@@ -1,10 +1,12 @@
-﻿namespace MigratorConsole
+﻿using System;
+
+namespace MigratorConsole
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
-
+            throw new NotImplementedException();
         }
     }
 }

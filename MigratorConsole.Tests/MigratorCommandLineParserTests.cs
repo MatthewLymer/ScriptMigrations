@@ -11,7 +11,9 @@ namespace MigratorConsole.Tests
             {
                 var args = CommandLineSplitter.CommandLineToArgs("foo.exe " + commandLine);
 
-                return new MigratorCommandLineParser().Parse<MigratorCommandLineParserResult>(args);
+                var parser = new MigratorCommandLineParser<MigratorCommandLineParserResult>();
+
+                return parser.Parse(args);
             }
 
             [Test]

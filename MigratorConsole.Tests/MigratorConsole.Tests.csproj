@@ -37,6 +37,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FluentValidation">
+      <HintPath>..\packages\FluentValidation.5.4.0.0\lib\Net40\FluentValidation.dll</HintPath>
+    </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.1.1311.0615\lib\net40\Moq.dll</HintPath>
     </Reference>
@@ -57,6 +60,8 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="BootStrapperTests.cs" />
+    <Compile Include="CommandLineBinderTests.cs" />
     <Compile Include="MigratorCommandLineParserTests.cs" />
     <Compile Include="CommandLineSplitter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -2,25 +2,24 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace MigratorConsole
 {
-    public class MigratorCommandLineParser
+    public class MigratorCommandLineParser<TModel> : ICommandLineParser<TModel> where TModel : new()
     {
-        public T Parse<T>(ICollection<string> args) where T : new()
+        public TModel Parse(ICollection<string> args)
         {
-            var obj = new T();
+            var obj = new TModel();
 
-            var items = typeof (T).GetProperties()
+            var items = typeof (TModel).GetProperties()
                 .Select(p => new {Property = p, Attributes = p.GetCustomAttributes(typeof (CommandLineAliasAttribute), true)})
                 .Where(p => p.Attributes.Length == 1)
                 .Select(p => new {p.Property, Attribute = (CommandLineAliasAttribute) p.Attributes.First()});
 
             foreach (var item in items)
             {
-                string alias = item.Attribute.Alias;
+                var alias = item.Attribute.Alias;
                 var property = item.Property;
 
                 if (property.PropertyType.IsAssignableFrom(typeof (bool)))
