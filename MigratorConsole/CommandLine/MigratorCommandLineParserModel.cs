@@ -1,6 +1,6 @@
-﻿namespace MigratorConsole
+﻿namespace MigratorConsole.CommandLine
 {
-    public class MigratorCommandLineParserResult
+    public class MigratorCommandLineParserModel
     {
         [CommandLineAlias("?")]
         public bool ShowHelp { get; set; }

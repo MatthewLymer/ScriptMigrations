@@ -2,30 +2,26 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace MigratorConsole
+namespace MigratorConsole.CommandLine
 {
     public class MigratorCommandLineParser<TModel> : ICommandLineParser<TModel> where TModel : new()
     {
         public TModel Parse(ICollection<string> args)
         {
-            var obj = new TModel();
+            var model = new TModel();
 
-            var items = typeof (TModel).GetProperties()
-                .Select(p => new {Property = p, Attributes = p.GetCustomAttributes(typeof (CommandLineAliasAttribute), true)})
-                .Where(p => p.Attributes.Length == 1)
-                .Select(p => new {p.Property, Attribute = (CommandLineAliasAttribute) p.Attributes.First()});
-
-            foreach (var item in items)
+            foreach (var attributedProperty in GetAttributedProperties())
             {
-                var alias = item.Attribute.Alias;
-                var property = item.Property;
+                var alias = attributedProperty.Attribute.Alias;
+                var property = attributedProperty.Property;
 
                 if (property.PropertyType.IsAssignableFrom(typeof (bool)))
                 {
                     var found = args.Any(a => ("/" + alias).Equals(a, StringComparison.OrdinalIgnoreCase));
-                    property.SetValue(obj, found, null);
+                    property.SetValue(model, found, null);
                 }
                 else
                 {
@@ -44,11 +40,28 @@ namespace MigratorConsole
 
                     var value = converter.ConvertFromInvariantString(match.Groups[1].Value);
 
-                    property.SetValue(obj, value, null);
+                    property.SetValue(model, value, null);
                 }
             }
 
-            return obj;
+            return model;
+        }
+
+        private static IEnumerable<AttributedProperty> GetAttributedProperties()
+        {
+            var items = typeof (TModel)
+                .GetProperties()
+                .Select(p => new {Property = p, Attributes = p.GetCustomAttributes(typeof (CommandLineAliasAttribute), true)})
+                .Where(p => p.Attributes.Length == 1)
+                .Select(p => new AttributedProperty{ Property = p.Property, Attribute = (CommandLineAliasAttribute) p.Attributes.First()});
+
+            return items;
+        }
+
+        private class AttributedProperty
+        {
+            public PropertyInfo Property { get; set; }
+            public CommandLineAliasAttribute Attribute { get; set; }
         }
     }
 }

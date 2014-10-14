@@ -2,10 +2,11 @@
 using System.Linq;
 using FluentValidation;
 using FluentValidation.Results;
-using NUnit.Framework;
+using MigratorConsole.CommandLine;
 using Moq;
+using NUnit.Framework;
 
-namespace MigratorConsole.Tests
+namespace MigratorConsole.Tests.CommandLine
 {
     class CommandLineBinderTests
     {

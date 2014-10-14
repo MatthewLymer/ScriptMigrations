@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MigratorConsole
+namespace MigratorConsole.CommandLine
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class CommandLineAliasAttribute : Attribute

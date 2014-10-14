@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MigratorConsole
+namespace MigratorConsole.CommandLine
 {
     public interface ICommandLineParser<out TModel> where TModel : new()
     {

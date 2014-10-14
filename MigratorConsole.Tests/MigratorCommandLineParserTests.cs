@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using MigratorConsole.CommandLine;
+using MigratorConsole.Tests.CommandLine;
+using NUnit.Framework;
 
 namespace MigratorConsole.Tests
 {
@@ -7,11 +9,11 @@ namespace MigratorConsole.Tests
         [TestFixture]
         public class WhenTellingMigratorCommandLineParserTestsToParseACommandLineArray
         {
-            private static MigratorCommandLineParserResult ParseCommandLine(string commandLine)
+            private static MigratorCommandLineParserModel ParseCommandLine(string commandLine)
             {
                 var args = CommandLineSplitter.CommandLineToArgs("foo.exe " + commandLine);
 
-                var parser = new MigratorCommandLineParser<MigratorCommandLineParserResult>();
+                var parser = new MigratorCommandLineParser<MigratorCommandLineParserModel>();
 
                 return parser.Parse(args);
             }

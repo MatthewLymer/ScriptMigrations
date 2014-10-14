@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
 
-namespace MigratorConsole
+namespace MigratorConsole.CommandLine
 {
     public class CommandLineBinder<TModel> : ICommandLineBinder<TModel> where TModel : new()
     {
@@ -37,12 +37,7 @@ namespace MigratorConsole
 
             var validationResult = _validator.Validate(model);
 
-            return new CommandLineBinderResult<TModel>
-            {
-                Model = model,
-                IsValid = validationResult.IsValid,
-                Errors = validationResult.Errors.Select(e => e.ErrorMessage)
-            };
+            return new CommandLineBinderResult<TModel>(model, validationResult.Errors.Select(e => e.ErrorMessage));
         }
     }
 }

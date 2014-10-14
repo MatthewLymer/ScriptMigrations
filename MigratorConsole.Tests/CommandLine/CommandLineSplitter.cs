@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace MigratorConsole.Tests
+namespace MigratorConsole.Tests.CommandLine
 {
     internal static class CommandLineSplitter
     {

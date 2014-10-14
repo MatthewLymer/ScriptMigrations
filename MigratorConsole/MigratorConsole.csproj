@@ -41,13 +41,15 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandLineBinder.cs" />
-    <Compile Include="CommandLineBinderResult.cs" />
-    <Compile Include="ICommandLineBinder.cs" />
-    <Compile Include="ICommandLineParser.cs" />
-    <Compile Include="MigratorCommandLineParser.cs" />
-    <Compile Include="MigratorCommandLineParserResult.cs" />
-    <Compile Include="CommandLineAliasAttribute.cs" />
+    <Compile Include="Bootstrapper.cs" />
+    <Compile Include="CommandLine\CommandLineBinder.cs" />
+    <Compile Include="CommandLine\CommandLineBinderResult.cs" />
+    <Compile Include="CommandLine\ICommandLineBinder.cs" />
+    <Compile Include="CommandLine\ICommandLineParser.cs" />
+    <Compile Include="IMigratorCommands.cs" />
+    <Compile Include="CommandLine\MigratorCommandLineParser.cs" />
+    <Compile Include="CommandLine\MigratorCommandLineParserModel.cs" />
+    <Compile Include="CommandLine\CommandLineAliasAttribute.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
