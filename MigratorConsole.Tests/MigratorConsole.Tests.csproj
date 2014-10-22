@@ -64,6 +64,7 @@
     <Compile Include="CommandLine\CommandLineBinderTests.cs" />
     <Compile Include="MigratorCommandLineParserTests.cs" />
     <Compile Include="CommandLine\CommandLineSplitter.cs" />
+    <Compile Include="MigratorCommandsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
