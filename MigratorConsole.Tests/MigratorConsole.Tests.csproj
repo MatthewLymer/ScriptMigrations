@@ -75,6 +75,10 @@
       <Project>{21889C3D-D9C4-40D6-A4E4-971735D19EE2}</Project>
       <Name>MigratorConsole</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Migrator\Migrator.csproj">
+      <Project>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</Project>
+      <Name>Migrator</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

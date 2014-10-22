@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Migrator.Runners;
 using MigratorConsole.Properties;
 using MigratorConsole.Wrappers;
@@ -10,10 +11,12 @@ namespace MigratorConsole
     public class MigratorCommands : IMigratorCommands
     {
         private readonly IConsoleWrapper _consoleWrapper;
+        private readonly IMigrationServiceFactory _migrationServiceFactory;
 
-        public MigratorCommands(IConsoleWrapper consoleWrapper)
+        public MigratorCommands(IConsoleWrapper consoleWrapper, IMigrationServiceFactory migrationServiceFactory)
         {
             _consoleWrapper = consoleWrapper;
+            _migrationServiceFactory = migrationServiceFactory;
         }
 
         public void ShowHelp()
@@ -35,50 +38,49 @@ namespace MigratorConsole
 
         public void MigrateUp(string runnerQualifiedName, string connectionString, string scriptsPath)
         {
-            try
+            var runnerFactory = LoadRunnerFactory(runnerQualifiedName, connectionString);
+
+            if (runnerFactory == null)
             {
-                var runnerFactory = LoadRunnerFactory(runnerQualifiedName, connectionString);
-            }
-            catch (MigrationAssemblyNotFoundException e)
-            {
-                _consoleWrapper.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat,
-                    ((FileNotFoundException) e.InnerException).FileName);
                 Environment.ExitCode = 1;
+                return;
             }
-            catch (MigrationRunnerFactoryNotFoundException e)
-            {
-                _consoleWrapper.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType,
-                    ((TypeLoadException)e.InnerException).TypeName);
-                Environment.ExitCode = 1;                
-            }
-        }
 
-        private static IRunnerFactory LoadRunnerFactory(string runnerQualifiedName, string connectionString)
-        {
-            var qualifiedName = ParseQualifiedName(runnerQualifiedName);
+            var service = _migrationServiceFactory.Create(scriptsPath, runnerFactory);
 
-            var constructorArgs = new object[] { connectionString };
-
-            try
-            {
-                return (IRunnerFactory) Activator.CreateInstance(
-                    qualifiedName.AssemblyName,
-                    qualifiedName.TypeName,
-                    constructorArgs).Unwrap();
-            }
-            catch (FileNotFoundException e)
-            {
-                throw new MigrationAssemblyNotFoundException(e);
-            }
-            catch (TypeLoadException e)
-            {
-                throw new MigrationRunnerFactoryNotFoundException(e);
-            }
+            service.Up();
         }
 
         public void MigrateDown(string runnerQualifiedName, string connectionString, string scriptsPath, long version)
         {
             throw new NotImplementedException();
+        }
+
+        private IRunnerFactory LoadRunnerFactory(string runnerQualifiedName, string connectionString)
+        {
+            var qualifiedName = ParseQualifiedName(runnerQualifiedName);
+
+            try
+            {
+                var assembly = Assembly.Load(qualifiedName.AssemblyName);
+                var type = assembly.GetType(qualifiedName.TypeName);
+
+                if (type == null)
+                {
+                    _consoleWrapper.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, qualifiedName.TypeName);
+                    return null;
+                }
+                
+                var constructorArgs = new object[] {connectionString};
+
+                return (IRunnerFactory)Activator.CreateInstance(type, constructorArgs);
+            }
+            catch (FileNotFoundException e)
+            {
+                _consoleWrapper.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, e.FileName);
+            }
+
+            return null;
         }
 
         private static QualifiedName ParseQualifiedName(string qualifiedName)
@@ -99,22 +101,6 @@ namespace MigratorConsole
             public string AssemblyName { get; private set; }
 
             public string TypeName { get; private set; }
-        }
-    }
-
-    internal class MigrationRunnerFactoryNotFoundException : Exception
-    {
-        public MigrationRunnerFactoryNotFoundException(TypeLoadException typeLoadException)
-            : base(typeLoadException.Message, typeLoadException)
-        {
-        }
-    }
-
-    internal class MigrationAssemblyNotFoundException : Exception
-    {
-        public MigrationAssemblyNotFoundException(FileNotFoundException innerException) 
-            : base(innerException.Message, innerException)
-        {
         }
     }
 }

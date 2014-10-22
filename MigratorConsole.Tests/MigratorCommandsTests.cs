@@ -1,8 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Remoting;
+using Migrator;
+using Migrator.Runners;
 using MigratorConsole.Properties;
 using MigratorConsole.Wrappers;
 using Moq;
@@ -15,13 +14,15 @@ namespace MigratorConsole.Tests
         internal class GivenAMigratorCommandsInstance
         {
             protected Mock<IConsoleWrapper> MockConsoleWrapper { get; private set; }
+            protected Mock<IMigrationServiceFactory> MockMigrationServiceFactory { get; private set; }
             protected MigratorCommands Commands { get; private set; }
 
             [SetUp]
             public void BeforeEachTest()
             {
                 MockConsoleWrapper = new Mock<IConsoleWrapper>();
-                Commands = new MigratorCommands(MockConsoleWrapper.Object);
+                MockMigrationServiceFactory = new Mock<IMigrationServiceFactory>();
+                Commands = new MigratorCommands(MockConsoleWrapper.Object, MockMigrationServiceFactory.Object);
             }
         }
 
@@ -82,6 +83,12 @@ namespace MigratorConsole.Tests
         {
             private const int FailureExitCode = 1;
 
+            private static string CreateQualifiedName(Type type)
+            {
+                var assemblyName = type.Assembly.FullName.Split(',')[0];
+                return string.Format("{0}, {1}", assemblyName, type.FullName);
+            }
+
             [Test]
             public void ShouldGiveErrorIfAssemblyCannotBeFound()
             {
@@ -108,6 +115,39 @@ namespace MigratorConsole.Tests
                 MockConsoleWrapper.Verify(x => x.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, typeName));
 
                 Assert.AreEqual(FailureExitCode, Environment.ExitCode);
+            }
+
+            [Test]
+            [TestCase("server=foo", "C:/zorp")]
+            [TestCase("server=bar", "C:/part")]
+            public void ShouldExecuteUpOnMigrationService(string connectionString, string scriptsPath)
+            {
+                var mockMigrationService = new Mock<IMigrationService>();
+
+                MockMigrationServiceFactory
+                    .Setup(x => x.Create(scriptsPath, It.Is<StubRunnerFactory>(s => s.ConnectionString == connectionString)))
+                    .Returns(mockMigrationService.Object);
+
+                var type = typeof (StubRunnerFactory);
+
+                Commands.MigrateUp(CreateQualifiedName(type), connectionString, scriptsPath);
+
+                mockMigrationService.Verify(x => x.Up(), Times.Once);
+            }
+        }
+
+        public class StubRunnerFactory : IRunnerFactory
+        {
+            public StubRunnerFactory(string connectionString)
+            {
+                ConnectionString = connectionString;
+            }
+
+            public string ConnectionString { get; private set; }
+
+            public IRunner Create()
+            {
+                throw new NotImplementedException();
             }
         }
     }
