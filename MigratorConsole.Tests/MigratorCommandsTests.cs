@@ -13,15 +13,38 @@ namespace MigratorConsole.Tests
     {
         internal class GivenAMigratorCommandsInstance
         {
+            protected const int FailureExitCode = 1;
             protected Mock<IConsoleWrapper> MockConsoleWrapper { get; private set; }
             protected Mock<IMigrationServiceFactory> MockMigrationServiceFactory { get; private set; }
+
             protected MigratorCommands Commands { get; private set; }
+
+            protected static string CreateQualifiedName(Type type)
+            {
+                var assemblyName = type.Assembly.FullName.Split(',')[0];
+                return string.Format("{0}, {1}", assemblyName, type.FullName);
+            }
+
+            protected void AssertAssemblyLoadFailure(string runnerQualifiedName)
+            {
+                MockConsoleWrapper.Verify(x => x.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, runnerQualifiedName));
+
+                Assert.AreEqual(FailureExitCode, Environment.ExitCode);
+            }
+
+            protected void AssertTypeLoadFailure(string runnerQualifiedName)
+            {
+                MockConsoleWrapper.Verify(x => x.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, runnerQualifiedName));
+
+                Assert.AreEqual(FailureExitCode, Environment.ExitCode);
+            }
 
             [SetUp]
             public void BeforeEachTest()
             {
                 MockConsoleWrapper = new Mock<IConsoleWrapper>();
                 MockMigrationServiceFactory = new Mock<IMigrationServiceFactory>();
+
                 Commands = new MigratorCommands(MockConsoleWrapper.Object, MockMigrationServiceFactory.Object);
             }
         }
@@ -81,40 +104,24 @@ namespace MigratorConsole.Tests
         [TestFixture]
         public class WhenTellingMigratorCommandsToMigrateUp : GivenAMigratorCommandsInstance
         {
-            private const int FailureExitCode = 1;
-
-            private static string CreateQualifiedName(Type type)
-            {
-                var assemblyName = type.Assembly.FullName.Split(',')[0];
-                return string.Format("{0}, {1}", assemblyName, type.FullName);
-            }
-
             [Test]
             public void ShouldGiveErrorIfAssemblyCannotBeFound()
             {
-                const string assemblyName = "notanassembly";
+                const string runnerQualifiedName = "notanassembly, notatypename";
 
-                var qualifiedName = string.Format("{0}, notatypename", assemblyName);
-
-                Commands.MigrateUp(qualifiedName, string.Empty, string.Empty);
+                Commands.MigrateUp(runnerQualifiedName, string.Empty, string.Empty);
                 
-                MockConsoleWrapper.Verify(x => x.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, assemblyName));
-
-                Assert.AreEqual(FailureExitCode, Environment.ExitCode);
+                AssertAssemblyLoadFailure(runnerQualifiedName);
             }
 
             [Test]
             public void ShouldGiveErrorIfRunnerFactoryTypeCannotBeInstanciated()
             {
-                const string typeName = "notatypename";
+                const string runnerQualifiedName = "MigratorConsole.Tests, notatypename";
 
-                var qualifiedName = string.Format("MigratorConsole.Tests, {0}", typeName);
+                Commands.MigrateUp(runnerQualifiedName, string.Empty, string.Empty);
 
-                Commands.MigrateUp(qualifiedName, string.Empty, string.Empty);
-
-                MockConsoleWrapper.Verify(x => x.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, typeName));
-
-                Assert.AreEqual(FailureExitCode, Environment.ExitCode);
+                AssertTypeLoadFailure(runnerQualifiedName);
             }
 
             [Test]
@@ -133,6 +140,58 @@ namespace MigratorConsole.Tests
                 Commands.MigrateUp(CreateQualifiedName(type), connectionString, scriptsPath);
 
                 mockMigrationService.Verify(x => x.Up(), Times.Once);
+            }
+        }
+
+        [TestFixture]
+        public class WhenTellingMigratorCommandsToMigrateDown : GivenAMigratorCommandsInstance
+        {
+            [Test]
+            public void ShouldGiveErrorIfAssemblyCannotBeFound()
+            {
+                const string runnerQualifiedName = "notanassembly, notatypename";
+
+                Commands.MigrateDown(runnerQualifiedName, string.Empty, string.Empty, 0);
+
+                AssertAssemblyLoadFailure(runnerQualifiedName);                
+            }
+
+            [Test]
+            public void ShouldGiveErrorIfRunnerFactoryTypeCannotBeInstanciated()
+            {
+                const string runnerQualifiedName = "MigratorConsole.Tests, notatypename";
+
+                Commands.MigrateDown(runnerQualifiedName, string.Empty, string.Empty, 0);
+
+                AssertTypeLoadFailure(runnerQualifiedName);
+            }
+
+            [Test]
+            [TestCase("server=foo", "C:/zorp", 0)]
+            [TestCase("server=baz", "C:/ping", 1)]
+            [TestCase("server=bar", "C:/part", 2)]
+            public void ShouldExecuteDownOnMigrationService(string connectionString, string scriptsPath, long version)
+            {
+                var mockMigrationService = new Mock<IMigrationService>();
+
+                MockMigrationServiceFactory
+                    .Setup(x => x.Create(scriptsPath, It.Is<StubRunnerFactory>(s => s.ConnectionString == connectionString)))
+                    .Returns(mockMigrationService.Object);
+
+                var type = typeof(StubRunnerFactory);
+
+                Commands.MigrateDown(CreateQualifiedName(type), connectionString, scriptsPath, version);
+
+                if (version > 0)
+                {
+                    mockMigrationService.Verify(x => x.DownToVersion(version), Times.Once);
+                    mockMigrationService.Verify(x => x.DownToZero(), Times.Never);   
+                }
+                else
+                {
+                    mockMigrationService.Verify(x => x.DownToZero(), Times.Once);
+                    mockMigrationService.Verify(x => x.DownToVersion(It.IsAny<long>()), Times.Never);
+                }
             }
         }
 

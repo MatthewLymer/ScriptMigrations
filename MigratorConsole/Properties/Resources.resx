@@ -110,4 +110,28 @@
   <data name="CouldNotCreateRunnerFactoryType" xml:space="preserve">
     <value>Could not load runner factory '{0}'</value>
   </data>
+  <data name="RunnerQualifiedNameIsRequired" xml:space="preserve">
+    <value>runner qualified name is required</value>
+  </data>
+  <data name="RunnerQualifiedNameBadFormat" xml:space="preserve">
+    <value>runner qualified name is not expected format</value>
+  </data>
+  <data name="ConnectionStringIsRequired" xml:space="preserve">
+    <value>connection string is required</value>
+  </data>
+  <data name="ScriptsPathIsRequired" xml:space="preserve">
+    <value>scripts path is required</value>
+  </data>
+  <data name="VersionIsRequired" xml:space="preserve">
+    <value>version is required</value>
+  </data>
+  <data name="VersionMustBeZeroOrMore" xml:space="preserve">
+    <value>version must be zero or more</value>
+  </data>
+  <data name="MigrateUpDownMutuallyExclusive" xml:space="preserve">
+    <value>cannot migrate up and down at the same time</value>
+  </data>
+  <data name="ShowHelpMigrateMutuallyExclusive" xml:space="preserve">
+    <value>cannot show help and migrate at the same time</value>
+  </data>
 </root>

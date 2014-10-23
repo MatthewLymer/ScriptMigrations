@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using Migrator.Runners;
 using MigratorConsole.Properties;
 using MigratorConsole.Wrappers;
@@ -12,6 +10,7 @@ namespace MigratorConsole
     {
         private readonly IConsoleWrapper _consoleWrapper;
         private readonly IMigrationServiceFactory _migrationServiceFactory;
+        private readonly ActivatorFacade _activatorFacade = new ActivatorFacade();
 
         public MigratorCommands(IConsoleWrapper consoleWrapper, IMigrationServiceFactory migrationServiceFactory)
         {
@@ -38,69 +37,55 @@ namespace MigratorConsole
 
         public void MigrateUp(string runnerQualifiedName, string connectionString, string scriptsPath)
         {
-            var runnerFactory = LoadRunnerFactory(runnerQualifiedName, connectionString);
+            var result = _activatorFacade.CreateInstance<IRunnerFactory>(runnerQualifiedName, new object[] {connectionString});
 
-            if (runnerFactory == null)
+            if (!result.HasInstance)
             {
+                WriteResultCodeErrorLine(result.ResultCode, runnerQualifiedName);
                 Environment.ExitCode = 1;
                 return;
             }
 
-            var service = _migrationServiceFactory.Create(scriptsPath, runnerFactory);
+            var service = _migrationServiceFactory.Create(scriptsPath, result.Instance);
 
             service.Up();
         }
 
         public void MigrateDown(string runnerQualifiedName, string connectionString, string scriptsPath, long version)
         {
-            throw new NotImplementedException();
-        }
+            var result = _activatorFacade.CreateInstance<IRunnerFactory>(runnerQualifiedName, new object[] { connectionString });
 
-        private IRunnerFactory LoadRunnerFactory(string runnerQualifiedName, string connectionString)
-        {
-            var qualifiedName = ParseQualifiedName(runnerQualifiedName);
-
-            try
+            if (!result.HasInstance)
             {
-                var assembly = Assembly.Load(qualifiedName.AssemblyName);
-                var type = assembly.GetType(qualifiedName.TypeName);
-
-                if (type == null)
-                {
-                    _consoleWrapper.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, qualifiedName.TypeName);
-                    return null;
-                }
-                
-                var constructorArgs = new object[] {connectionString};
-
-                return (IRunnerFactory)Activator.CreateInstance(type, constructorArgs);
-            }
-            catch (FileNotFoundException e)
-            {
-                _consoleWrapper.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, e.FileName);
+                WriteResultCodeErrorLine(result.ResultCode, runnerQualifiedName);
+                Environment.ExitCode = 1;
+                return;
             }
 
-            return null;
-        }
+            var service = _migrationServiceFactory.Create(scriptsPath, result.Instance);
 
-        private static QualifiedName ParseQualifiedName(string qualifiedName)
-        {
-            var segments = qualifiedName.Split(',');
-
-            return new QualifiedName(segments[0].Trim(), segments[1].Trim());
-        }
-
-        private class QualifiedName
-        {
-            public QualifiedName(string assemblyName, string typeName)
+            if (version > 0)
             {
-                AssemblyName = assemblyName;
-                TypeName = typeName;
+                service.DownToVersion(version);
             }
+            else
+            {
+                service.DownToZero();
+            }
+        }
 
-            public string AssemblyName { get; private set; }
+        private void WriteResultCodeErrorLine(ActivatorResultCode resultCode, string runnerQualifiedName)
+        {
+            switch (resultCode)
+            {
+                case ActivatorResultCode.TypeNotFound:
+                    _consoleWrapper.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, runnerQualifiedName);
+                    break;
 
-            public string TypeName { get; private set; }
+                case ActivatorResultCode.AssemblyNotFound:
+                    _consoleWrapper.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, runnerQualifiedName);
+                    break;
+            }
         }
     }
 }

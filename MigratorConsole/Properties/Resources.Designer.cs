@@ -61,6 +61,15 @@ namespace MigratorConsole.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to connection string is required.
+        /// </summary>
+        public static string ConnectionStringIsRequired {
+            get {
+                return ResourceManager.GetString("ConnectionStringIsRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not load runner factory &apos;{0}&apos;.
         /// </summary>
         public static string CouldNotCreateRunnerFactoryType {
@@ -93,6 +102,69 @@ namespace MigratorConsole.Properties {
         public static string HelpUsage {
             get {
                 return ResourceManager.GetString("HelpUsage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to cannot migrate up and down at the same time.
+        /// </summary>
+        public static string MigrateUpDownMutuallyExclusive {
+            get {
+                return ResourceManager.GetString("MigrateUpDownMutuallyExclusive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to runner qualified name is not expected format.
+        /// </summary>
+        public static string RunnerQualifiedNameBadFormat {
+            get {
+                return ResourceManager.GetString("RunnerQualifiedNameBadFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to runner qualified name is required.
+        /// </summary>
+        public static string RunnerQualifiedNameIsRequired {
+            get {
+                return ResourceManager.GetString("RunnerQualifiedNameIsRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to scripts path is required.
+        /// </summary>
+        public static string ScriptsPathIsRequired {
+            get {
+                return ResourceManager.GetString("ScriptsPathIsRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to cannot show help and migrate at the same time.
+        /// </summary>
+        public static string ShowHelpMigrateMutuallyExclusive {
+            get {
+                return ResourceManager.GetString("ShowHelpMigrateMutuallyExclusive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to version is required.
+        /// </summary>
+        public static string VersionIsRequired {
+            get {
+                return ResourceManager.GetString("VersionIsRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to version must be zero or more.
+        /// </summary>
+        public static string VersionMustBeZeroOrMore {
+            get {
+                return ResourceManager.GetString("VersionMustBeZeroOrMore", resourceCulture);
             }
         }
     }

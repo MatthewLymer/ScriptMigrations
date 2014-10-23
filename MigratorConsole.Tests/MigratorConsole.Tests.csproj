@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="BootstrapperTests.cs" />
     <Compile Include="CommandLine\CommandLineBinderTests.cs" />
+    <Compile Include="CommandLine\MigratorCommandLineParserModelValidatorTests.cs" />
     <Compile Include="MigratorCommandLineParserTests.cs" />
     <Compile Include="CommandLine\CommandLineSplitter.cs" />
     <Compile Include="MigratorCommandsTests.cs" />

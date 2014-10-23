@@ -41,11 +41,14 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivatorFacade.cs" />
+    <Compile Include="ActivatorResult.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="CommandLine\CommandLineBinder.cs" />
     <Compile Include="CommandLine\CommandLineBinderResult.cs" />
     <Compile Include="CommandLine\ICommandLineBinder.cs" />
     <Compile Include="CommandLine\ICommandLineParser.cs" />
+    <Compile Include="CommandLine\MigratorCommandLineParserModelValidator.cs" />
     <Compile Include="IMigrationServiceFactory.cs" />
     <Compile Include="IMigratorCommands.cs" />
     <Compile Include="CommandLine\MigratorCommandLineParser.cs" />
@@ -69,6 +72,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
