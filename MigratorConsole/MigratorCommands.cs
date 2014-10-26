@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Migrator;
 using Migrator.Runners;
 using MigratorConsole.Properties;
 using MigratorConsole.Wrappers;
@@ -10,7 +11,7 @@ namespace MigratorConsole
     {
         private readonly IConsoleWrapper _consoleWrapper;
         private readonly IMigrationServiceFactory _migrationServiceFactory;
-        private readonly ActivatorFacade _activatorFacade = new ActivatorFacade();
+        private readonly IActivatorFacade _activatorFacade = new ActivatorFacade();
 
         public MigratorCommands(IConsoleWrapper consoleWrapper, IMigrationServiceFactory migrationServiceFactory)
         {
@@ -48,7 +49,16 @@ namespace MigratorConsole
 
             var service = _migrationServiceFactory.Create(scriptsPath, result.Instance);
 
+            service.OnUpScriptStartedEvent += OnUpScriptStartedEvent;
+
             service.Up();
+        }
+
+        private void OnUpScriptStartedEvent(object o, UpScriptStartedEventArgs args)
+        {
+            var upScript = args.UpScript;
+
+            _consoleWrapper.Write(Resources.StartingMigrationMessageFormat, upScript.Version, upScript.Name);
         }
 
         public void MigrateDown(string runnerQualifiedName, string connectionString, string scriptsPath, long version)
@@ -78,11 +88,11 @@ namespace MigratorConsole
         {
             switch (resultCode)
             {
-                case ActivatorResultCode.TypeNotFound:
+                case ActivatorResultCode.UnableToResolveType:
                     _consoleWrapper.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, runnerQualifiedName);
                     break;
 
-                case ActivatorResultCode.AssemblyNotFound:
+                case ActivatorResultCode.UnableToResolveAssembly:
                     _consoleWrapper.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, runnerQualifiedName);
                     break;
             }

@@ -151,6 +151,15 @@ namespace MigratorConsole.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Starting migration {0}, &apos;{1}&apos;....
+        /// </summary>
+        public static string StartingMigrationMessageFormat {
+            get {
+                return ResourceManager.GetString("StartingMigrationMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to version is required.
         /// </summary>
         public static string VersionIsRequired {

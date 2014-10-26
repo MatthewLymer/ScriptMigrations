@@ -5,8 +5,8 @@ namespace MigratorConsole
     public enum ActivatorResultCode
     {
         Successful,
-        TypeNotFound,
-        AssemblyNotFound
+        UnableToResolveType,
+        UnableToResolveAssembly
     }
 
     public class ActivatorResult<T> where T : class

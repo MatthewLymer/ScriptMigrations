@@ -13,5 +13,15 @@ namespace MigratorConsole.Wrappers
         {
             Console.Error.WriteLine(format, arg);
         }
+        
+        public void Write(string format, params object[] arg)
+        {
+            Console.Write(format, arg);
+        }
+
+        public void WriteError(string format, params object[] arg)
+        {
+            Console.Error.Write(format, arg);
+        }
     }
 }

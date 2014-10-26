@@ -60,6 +60,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="ActivatorFacadeTests.cs" />
     <Compile Include="BootstrapperTests.cs" />
     <Compile Include="CommandLine\CommandLineBinderTests.cs" />
     <Compile Include="CommandLine\MigratorCommandLineParserModelValidatorTests.cs" />

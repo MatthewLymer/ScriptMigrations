@@ -12,6 +12,8 @@ namespace Migrator
         private readonly IScriptFinder _scriptFinder;
         private readonly IRunnerFactory _runnerFactory;
 
+        public event Action<object, UpScriptStartedEventArgs> OnUpScriptStartedEvent;
+
         public MigrationService(IScriptFinder scriptFinder, IRunnerFactory runnerFactory)
         {
             _scriptFinder = scriptFinder;

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using Migrator;
 using Migrator.Runners;
+using Migrator.Scripts;
 using MigratorConsole.Properties;
 using MigratorConsole.Wrappers;
 using Moq;
@@ -14,7 +16,9 @@ namespace MigratorConsole.Tests
         internal class GivenAMigratorCommandsInstance
         {
             protected const int FailureExitCode = 1;
+
             protected Mock<IConsoleWrapper> MockConsoleWrapper { get; private set; }
+
             protected Mock<IMigrationServiceFactory> MockMigrationServiceFactory { get; private set; }
 
             protected MigratorCommands Commands { get; private set; }
@@ -140,6 +144,26 @@ namespace MigratorConsole.Tests
                 Commands.MigrateUp(CreateQualifiedName(type), connectionString, scriptsPath);
 
                 mockMigrationService.Verify(x => x.Up(), Times.Once);
+            }
+
+            [Test]
+            [TestCase(1, "my-script")]
+            public void ShouldWriteWhenUpScriptStartedEventFires(long version, string scriptName)
+            {
+                var mockMigrationService = new Mock<IMigrationService>();
+
+                MockMigrationServiceFactory
+                    .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<IRunnerFactory>()))
+                    .Returns(mockMigrationService.Object);
+
+                var type = typeof(StubRunnerFactory);
+
+                var eventArgs = new UpScriptStartedEventArgs(new UpScript(version, scriptName, "select * from nothing"));
+                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnUpScriptStartedEvent += null, eventArgs));
+
+                Commands.MigrateUp(CreateQualifiedName(type), "", "");
+
+                MockConsoleWrapper.Verify(x => x.Write(Resources.StartingMigrationMessageFormat, version, scriptName));
             }
         }
 
