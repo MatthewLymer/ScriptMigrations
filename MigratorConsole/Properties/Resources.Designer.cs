@@ -61,6 +61,15 @@ namespace MigratorConsole.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Completed!.
+        /// </summary>
+        public static string CompletedMigrationMessage {
+            get {
+                return ResourceManager.GetString("CompletedMigrationMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to connection string is required.
         /// </summary>
         public static string ConnectionStringIsRequired {

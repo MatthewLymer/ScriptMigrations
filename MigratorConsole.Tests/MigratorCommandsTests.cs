@@ -2,7 +2,6 @@
 using System.Linq;
 using Migrator;
 using Migrator.Runners;
-using Migrator.Scripts;
 using MigratorConsole.Properties;
 using MigratorConsole.Wrappers;
 using Moq;
@@ -15,13 +14,14 @@ namespace MigratorConsole.Tests
         internal class GivenAMigratorCommandsInstance
         {
             protected const int FailureExitCode = 1;
+            protected const string RunnerQualifiedName = "MyRunnerAssembly, MyRunnerFactoryType";
+            protected const string ConnectionString = "server=localhost";
+            protected const string ScriptsPath = ".";
+
+            private Mock<IActivatorFacade> _mockActivatorFacade;
+            private Mock<IMigrationServiceFactory> _mockMigrationServiceFactory;
 
             protected Mock<IConsoleWrapper> MockConsoleWrapper { get; private set; }
-
-            protected Mock<IMigrationServiceFactory> MockMigrationServiceFactory { get; private set; }
-
-            protected Mock<IActivatorFacade> MockActivatorFacade { get; set; }
-
             protected MigratorCommands Commands { get; private set; }
 
             protected static string CreateQualifiedName(Type type)
@@ -44,14 +44,42 @@ namespace MigratorConsole.Tests
                 Assert.AreEqual(FailureExitCode, Environment.ExitCode);
             }
 
+            protected void SetupActivatorFacade(string runnerQualifiedName, string connectionString, ActivatorResultCode resultCode)
+            {
+                _mockActivatorFacade.Setup(
+                    x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString))
+                    .Returns(new ActivatorResult<IRunnerFactory>(resultCode));
+            }
+
+            protected void SetupActivatorFacade(string runnerQualifiedName, string connectionString, IRunnerFactory runnerFactory)
+            {
+                _mockActivatorFacade.Setup(
+                    x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString))
+                    .Returns(new ActivatorResult<IRunnerFactory>(runnerFactory));
+            }
+
+            protected void SetupMigrationServiceFactory(IRunnerFactory runnerFactory, string scriptsPath, IMigrationService migrationService)
+            {
+                _mockMigrationServiceFactory
+                    .Setup(x => x.Create(scriptsPath, runnerFactory))
+                    .Returns(migrationService);
+            }
+
+            protected void SetupActivatorWithServiceFactory(string runnerQualifiedName, string connectionString, string scriptsPath, IMigrationService migrationService)
+            {
+                var runnerFactory = new Mock<IRunnerFactory>().Object;
+                SetupActivatorFacade(runnerQualifiedName, connectionString, runnerFactory);
+                SetupMigrationServiceFactory(runnerFactory, scriptsPath, migrationService);
+            }
+
             [SetUp]
             public void BeforeEachTest()
             {
                 MockConsoleWrapper = new Mock<IConsoleWrapper>();
-                MockMigrationServiceFactory = new Mock<IMigrationServiceFactory>();
-                MockActivatorFacade = new Mock<IActivatorFacade>();
+                _mockMigrationServiceFactory = new Mock<IMigrationServiceFactory>();
+                _mockActivatorFacade = new Mock<IActivatorFacade>();
 
-                Commands = new MigratorCommands(MockConsoleWrapper.Object, MockMigrationServiceFactory.Object, MockActivatorFacade.Object);
+                Commands = new MigratorCommands(MockConsoleWrapper.Object, _mockMigrationServiceFactory.Object, _mockActivatorFacade.Object);
             }
         }
 
@@ -115,11 +143,9 @@ namespace MigratorConsole.Tests
             {
                 const string runnerQualifiedName = "notanassembly, notatypename";
 
-                MockActivatorFacade.Setup(
-                    x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, It.IsAny<object[]>()))
-                    .Returns(new ActivatorResult<IRunnerFactory>(ActivatorResultCode.UnableToResolveAssembly));
-
-                Commands.MigrateUp(runnerQualifiedName, string.Empty, string.Empty);
+                SetupActivatorFacade(runnerQualifiedName, ConnectionString, ActivatorResultCode.UnableToResolveAssembly);
+                
+                Commands.MigrateUp(runnerQualifiedName, ConnectionString, string.Empty);
                 
                 AssertAssemblyLoadFailure(runnerQualifiedName);
             }
@@ -129,11 +155,9 @@ namespace MigratorConsole.Tests
             {
                 const string runnerQualifiedName = "MigratorConsole.Tests, notatypename";
 
-                MockActivatorFacade.Setup(
-                    x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, It.IsAny<object[]>()))
-                    .Returns(new ActivatorResult<IRunnerFactory>(ActivatorResultCode.UnableToResolveType));
+                SetupActivatorFacade(runnerQualifiedName, ConnectionString, ActivatorResultCode.UnableToResolveType);
 
-                Commands.MigrateUp(runnerQualifiedName, string.Empty, string.Empty);
+                Commands.MigrateUp(runnerQualifiedName, ConnectionString, string.Empty);
 
                 AssertTypeLoadFailure(runnerQualifiedName);
             }
@@ -143,51 +167,44 @@ namespace MigratorConsole.Tests
             [TestCase("server=bar", "C:/part")]
             public void ShouldExecuteUpOnMigrationService(string connectionString, string scriptsPath)
             {
-                const string runnerQualifiedName = "MyRunnerAssembly, MyRunnerFactoryType";
-
-                var runnerFactory = new Mock<IRunnerFactory>().Object;
-                
-
-                MockActivatorFacade.Setup(
-                    x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, It.IsAny<object[]>()))
-                    .Returns(new ActivatorResult<IRunnerFactory>(runnerFactory));
-
-
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                MockMigrationServiceFactory
-                    .Setup(x => x.Create(scriptsPath, runnerFactory))
-                    .Returns(mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, connectionString, scriptsPath, mockMigrationService.Object);
 
-                Commands.MigrateUp(runnerQualifiedName, connectionString, scriptsPath);
+                Commands.MigrateUp(RunnerQualifiedName, connectionString, scriptsPath);
 
                 mockMigrationService.Verify(x => x.Up(), Times.Once);
             }
 
             [Test]
             [TestCase(1, "my-script")]
+            [TestCase(2, "your-script")]
             public void ShouldWriteWhenUpScriptStartedEventFires(long version, string scriptName)
             {
-                const string runnerQualifiedName = "MyRunnerAssembly, MyRunnerFactoryType";
-
-                var runnerFactory = new Mock<IRunnerFactory>().Object;
-
-                MockActivatorFacade.Setup(
-                    x => x.CreateInstance<IRunnerFactory>(It.IsAny<string>(), It.IsAny<object[]>()))
-                    .Returns(new ActivatorResult<IRunnerFactory>(runnerFactory));
-
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                MockMigrationServiceFactory
-                    .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<IRunnerFactory>()))
-                    .Returns(mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
 
-                var eventArgs = new UpScriptStartedEventArgs(new UpScript(version, scriptName, "select * from nothing"));
-                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnUpScriptStartedEvent += null, eventArgs));
+                var eventArgs = new UpScriptStartedEventArgs(version, scriptName);
+                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnUpScriptStarted += null, eventArgs));
 
-                Commands.MigrateUp(runnerQualifiedName, "", "");
+                Commands.MigrateUp(RunnerQualifiedName, ConnectionString, ScriptsPath);
 
                 MockConsoleWrapper.Verify(x => x.Write(Resources.StartingMigrationMessageFormat, version, scriptName));
+            }
+
+            [Test]
+            public void ShouldWriteWhenUpScriptCompletedEventFires()
+            {
+                var mockMigrationService = new Mock<IMigrationService>();
+
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+
+                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnUpScriptCompleted += null, EventArgs.Empty));
+
+                Commands.MigrateUp(RunnerQualifiedName, ConnectionString, ScriptsPath);
+
+                MockConsoleWrapper.Verify(x => x.WriteLine(Resources.CompletedMigrationMessage));                
             }
         }
 
@@ -197,38 +214,27 @@ namespace MigratorConsole.Tests
             [Test]
             public void ShouldGiveErrorIfAssemblyCannotBeFound()
             {
-                const string runnerQualifiedName = "notanassembly, notatypename";
-                const string connectionString = "server=localhost";
+                const string assemblyMissingQualifiedName = "notanassembly, notatypename";
 
                 const ActivatorResultCode resultCode = ActivatorResultCode.UnableToResolveAssembly;
                 
-                SetupActivatorFacade(runnerQualifiedName, connectionString, resultCode);
+                SetupActivatorFacade(assemblyMissingQualifiedName, ConnectionString, resultCode);
 
-                Commands.MigrateDown(runnerQualifiedName, connectionString, string.Empty, 0);
+                Commands.MigrateDown(assemblyMissingQualifiedName, ConnectionString, string.Empty, 0);
 
-                AssertAssemblyLoadFailure(runnerQualifiedName);                
-            }
-
-            private void SetupActivatorFacade(string runnerQualifiedName, string connectionString, ActivatorResultCode resultCode)
-            {
-                MockActivatorFacade.Setup(
-                    x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString))
-                    .Returns(new ActivatorResult<IRunnerFactory>(resultCode));
+                AssertAssemblyLoadFailure(assemblyMissingQualifiedName);                
             }
 
             [Test]
             public void ShouldGiveErrorIfRunnerFactoryTypeCannotBeInstanciated()
             {
-                const string runnerQualifiedName = "MigratorConsole.Tests, notatypename";
-                const string connectionString = "server=localhost";
+                const string typeMissingQualifiedName = "MigratorConsole.Tests, notatypename";
 
-                MockActivatorFacade.Setup(
-                    x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString))
-                    .Returns(new ActivatorResult<IRunnerFactory>(ActivatorResultCode.UnableToResolveType));
+                SetupActivatorFacade(typeMissingQualifiedName, ConnectionString, ActivatorResultCode.UnableToResolveType);
 
-                Commands.MigrateDown(runnerQualifiedName, connectionString, string.Empty, 0);
+                Commands.MigrateDown(typeMissingQualifiedName, ConnectionString, string.Empty, 0);
 
-                AssertTypeLoadFailure(runnerQualifiedName);
+                AssertTypeLoadFailure(typeMissingQualifiedName);
             }
 
             [Test]
@@ -237,21 +243,11 @@ namespace MigratorConsole.Tests
             [TestCase("server=bar", "C:/part", 2)]
             public void ShouldExecuteDownOnMigrationService(string connectionString, string scriptsPath, long version)
             {
-                const string runnerQualifiedName = "MyAssemblyName, MyTypeName";
-
-                var runnerFactory = new Mock<IRunnerFactory>().Object;
-
-                MockActivatorFacade
-                    .Setup(x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString))
-                    .Returns(new ActivatorResult<IRunnerFactory>(runnerFactory));
-                
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                MockMigrationServiceFactory
-                    .Setup(x => x.Create(scriptsPath, runnerFactory))
-                    .Returns(mockMigrationService.Object);
-                
-                Commands.MigrateDown(runnerQualifiedName, connectionString, scriptsPath, version);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, connectionString, scriptsPath, mockMigrationService.Object);
+
+                Commands.MigrateDown(RunnerQualifiedName, connectionString, scriptsPath, version);
 
                 if (version > 0)
                 {

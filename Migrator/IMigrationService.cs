@@ -8,6 +8,7 @@ namespace Migrator
         void DownToZero();
         void DownToVersion(long version);
 
-        event Action<object, UpScriptStartedEventArgs> OnUpScriptStartedEvent;
+        event Action<object, UpScriptStartedEventArgs> OnUpScriptStarted;
+        event Action<object, EventArgs> OnUpScriptCompleted;
     }
 }

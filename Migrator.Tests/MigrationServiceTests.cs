@@ -49,13 +49,14 @@ namespace Migrator.Tests
             private class GivenThereIsOneUpScript : GivenAnEmptyDatabase
             {
                 private Mock<IScriptFinder> _mockScriptFinder;
+                private readonly UpScript _upScript = new UpScript(25, "my-script", "");
 
                 [SetUp]
                 public new void BeforeEachTest()
                 {
                     _mockScriptFinder = new Mock<IScriptFinder>();
 
-                    _mockScriptFinder.Setup(x => x.GetUpScripts()).Returns(new[] {new UpScript(25, "", "")});
+                    _mockScriptFinder.Setup(x => x.GetUpScripts()).Returns(new[] {_upScript});
                 }
 
                 [TestFixture]
@@ -78,6 +79,49 @@ namespace Migrator.Tests
                         // assert
                         _mockRunner.Verify(x => x.ExecuteUpScript(It.IsAny<UpScript>()), Times.Once);
                         _mockRunner.Verify(x => x.Commit(), Times.Once);
+                    }
+
+                    [Test]
+                    public void ShouldFireUpScriptStartedEventBeforeInvokingRunner()
+                    {
+                        var eventFired = false;
+                        var upScriptFired = false;
+
+                        _migrationService.OnUpScriptStarted += (o, args) =>
+                        {
+                            Assert.AreEqual(_migrationService, o);
+                            Assert.AreEqual(_upScript.Version, args.Version);
+                            Assert.AreEqual(_upScript.Name, args.ScriptName);
+                            Assert.IsFalse(upScriptFired);
+                            eventFired = true;
+                        };
+
+                        _mockRunner.Setup(x => x.ExecuteUpScript(It.IsAny<UpScript>())).Callback(() => upScriptFired = true);
+
+                        _migrationService.Up();
+
+                        Assert.IsTrue(eventFired);
+                    }
+
+                    [Test]
+                    public void ShouldFireUpScriptCompletedEventAfterInvokingRunner()
+                    {
+                        var eventFired = false;
+                        var upScriptFired = false;
+
+                        _migrationService.OnUpScriptCompleted += (o, args) =>
+                        {
+                            Assert.AreEqual(_migrationService, o);
+                            Assert.AreEqual(EventArgs.Empty, args);
+                            Assert.IsTrue(upScriptFired);
+                            eventFired = true;
+                        };
+
+                        _mockRunner.Setup(x => x.ExecuteUpScript(It.IsAny<UpScript>())).Callback(() => upScriptFired = true);
+
+                        _migrationService.Up();
+
+                        Assert.IsTrue(eventFired);
                     }
 
                     [Test]

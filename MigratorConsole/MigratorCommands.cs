@@ -73,7 +73,8 @@ namespace MigratorConsole
 
         private void ExecuteUp(IMigrationService service)
         {
-            service.OnUpScriptStartedEvent += OnUpScriptStartedEvent;
+            service.OnUpScriptStarted += OnUpScriptStarted;
+            service.OnUpScriptCompleted += OnUpScriptCompleted;
 
             service.Up();
         }
@@ -90,11 +91,14 @@ namespace MigratorConsole
             }
         }
 
-        private void OnUpScriptStartedEvent(object source, UpScriptStartedEventArgs args)
+        private void OnUpScriptStarted(object sender, UpScriptStartedEventArgs args)
         {
-            var upScript = args.UpScript;
+            _consoleWrapper.Write(Resources.StartingMigrationMessageFormat, args.Version, args.ScriptName);
+        }
 
-            _consoleWrapper.Write(Resources.StartingMigrationMessageFormat, upScript.Version, upScript.Name);
+        private void OnUpScriptCompleted(object sender, EventArgs args)
+        {
+            _consoleWrapper.WriteLine(Resources.CompletedMigrationMessage);
         }
 
         private void WriteResultCodeErrorLine(ActivatorResultCode resultCode, string runnerQualifiedName)

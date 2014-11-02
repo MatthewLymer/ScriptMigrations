@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Migrator.Facades;
@@ -23,10 +24,20 @@ namespace Migrator.Scripts
 
         public IEnumerable<UpScript> GetUpScripts()
         {
+            return GetScripts(UpScriptRegex, CreateUpScript);
+        }
+
+        public IEnumerable<DownScript> GetDownScripts()
+        {
+            return GetScripts(DownScriptRegex, CreateDownScript);
+        }
+
+        private IEnumerable<TScript> GetScripts<TScript>(Regex regex, Func<IList<string>, string, TScript> createScript)
+        {
             var files = _fileSystemFacade.GetFiles(_path, SqlFileSearchPattern, SearchOption.AllDirectories);
 
-            var scripts = new List<UpScript>();
-            
+            var scripts = new List<TScript>();
+
             foreach (var file in files)
             {
                 var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
@@ -36,49 +47,27 @@ namespace Migrator.Scripts
                     continue;
                 }
 
-                if (!UpScriptRegex.IsMatch(fileNameWithoutExtension))
+                if (!regex.IsMatch(fileNameWithoutExtension))
                 {
                     continue;
                 }
 
                 var fileSegments = fileNameWithoutExtension.Split('_');
-                
-                var script = new UpScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
 
-                scripts.Add(script);
+                scripts.Add(createScript(fileSegments, file));
             }
 
             return scripts;
         }
 
-        public IEnumerable<DownScript> GetDownScripts()
+        private UpScript CreateUpScript(IList<string> fileSegments, string file)
         {
-            var files = _fileSystemFacade.GetFiles(_path, SqlFileSearchPattern, SearchOption.AllDirectories);
+            return new UpScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
+        }
 
-            var scripts = new List<DownScript>();
-
-            foreach (var file in files)
-            {
-                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
-
-                if (fileNameWithoutExtension == null)
-                {
-                    continue;
-                }
-
-                if (!DownScriptRegex.IsMatch(fileNameWithoutExtension))
-                {
-                    continue;
-                }
-
-                var fileSegments = fileNameWithoutExtension.Split('_');
-
-                var script = new DownScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
-
-                scripts.Add(script);
-            }
-
-            return scripts;
+        private DownScript CreateDownScript(IList<string> fileSegments, string file)
+        {
+            return new DownScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
         }
     }
 }

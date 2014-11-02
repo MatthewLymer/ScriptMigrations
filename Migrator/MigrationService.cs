@@ -12,12 +12,15 @@ namespace Migrator
         private readonly IScriptFinder _scriptFinder;
         private readonly IRunnerFactory _runnerFactory;
 
-        public event Action<object, UpScriptStartedEventArgs> OnUpScriptStartedEvent;
+        public event Action<object, UpScriptStartedEventArgs> OnUpScriptStarted;
+        public event Action<object, EventArgs> OnUpScriptCompleted;
 
         public MigrationService(IScriptFinder scriptFinder, IRunnerFactory runnerFactory)
         {
             _scriptFinder = scriptFinder;
             _runnerFactory = runnerFactory;
+
+            OnUpScriptStarted += (o, args) => { };
         }
 
         public void Up()
@@ -35,7 +38,11 @@ namespace Migrator
 
                 foreach (var migration in ExcludeExecutedUpScripts(upScripts, executedMigrations).OrderBy(x => x.Version))
                 {
+                    RaiseEvent(OnUpScriptStarted, this, new UpScriptStartedEventArgs(migration.Version, migration.Name));
+
                     runner.ExecuteUpScript(migration);
+
+                    RaiseEvent(OnUpScriptCompleted, this, EventArgs.Empty);
                 }
 
                 runner.Commit();
@@ -117,6 +124,14 @@ namespace Migrator
                 }
 
                 runner.ExecuteDownScript(downScript);
+            }
+        }
+
+        private static void RaiseEvent<T>(Action<object, T> @event, object sender, T args)
+        {
+            if (@event != null)
+            {
+                @event(sender, args);
             }
         }
     }
