@@ -11,12 +11,13 @@ namespace MigratorConsole
     {
         private readonly IConsoleWrapper _consoleWrapper;
         private readonly IMigrationServiceFactory _migrationServiceFactory;
-        private readonly IActivatorFacade _activatorFacade = new ActivatorFacade();
+        private readonly IActivatorFacade _activatorFacade;
 
-        public MigratorCommands(IConsoleWrapper consoleWrapper, IMigrationServiceFactory migrationServiceFactory)
+        public MigratorCommands(IConsoleWrapper consoleWrapper, IMigrationServiceFactory migrationServiceFactory, IActivatorFacade activatorFacade)
         {
             _consoleWrapper = consoleWrapper;
             _migrationServiceFactory = migrationServiceFactory;
+            _activatorFacade = activatorFacade;
         }
 
         public void ShowHelp()
@@ -38,7 +39,25 @@ namespace MigratorConsole
 
         public void MigrateUp(string runnerQualifiedName, string connectionString, string scriptsPath)
         {
-            var result = _activatorFacade.CreateInstance<IRunnerFactory>(runnerQualifiedName, new object[] {connectionString});
+            InvokeServiceIfConstructable(
+                runnerQualifiedName,
+                connectionString,
+                scriptsPath,
+                ExecuteUp);
+        }
+
+        public void MigrateDown(string runnerQualifiedName, string connectionString, string scriptsPath, long version)
+        {
+            InvokeServiceIfConstructable(
+                runnerQualifiedName, 
+                connectionString, 
+                scriptsPath,
+                service => ExecuteDown(service, version));
+        }
+
+        private void InvokeServiceIfConstructable(string runnerQualifiedName, string connectionString, string scriptsPath, Action<IMigrationService> action)
+        {
+            var result = _activatorFacade.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString);
 
             if (!result.HasInstance)
             {
@@ -49,31 +68,18 @@ namespace MigratorConsole
 
             var service = _migrationServiceFactory.Create(scriptsPath, result.Instance);
 
+            action(service);
+        }
+
+        private void ExecuteUp(IMigrationService service)
+        {
             service.OnUpScriptStartedEvent += OnUpScriptStartedEvent;
 
             service.Up();
         }
 
-        private void OnUpScriptStartedEvent(object o, UpScriptStartedEventArgs args)
+        private static void ExecuteDown(IMigrationService service, long version)
         {
-            var upScript = args.UpScript;
-
-            _consoleWrapper.Write(Resources.StartingMigrationMessageFormat, upScript.Version, upScript.Name);
-        }
-
-        public void MigrateDown(string runnerQualifiedName, string connectionString, string scriptsPath, long version)
-        {
-            var result = _activatorFacade.CreateInstance<IRunnerFactory>(runnerQualifiedName, new object[] { connectionString });
-
-            if (!result.HasInstance)
-            {
-                WriteResultCodeErrorLine(result.ResultCode, runnerQualifiedName);
-                Environment.ExitCode = 1;
-                return;
-            }
-
-            var service = _migrationServiceFactory.Create(scriptsPath, result.Instance);
-
             if (version > 0)
             {
                 service.DownToVersion(version);
@@ -82,6 +88,13 @@ namespace MigratorConsole
             {
                 service.DownToZero();
             }
+        }
+
+        private void OnUpScriptStartedEvent(object source, UpScriptStartedEventArgs args)
+        {
+            var upScript = args.UpScript;
+
+            _consoleWrapper.Write(Resources.StartingMigrationMessageFormat, upScript.Version, upScript.Name);
         }
 
         private void WriteResultCodeErrorLine(ActivatorResultCode resultCode, string runnerQualifiedName)

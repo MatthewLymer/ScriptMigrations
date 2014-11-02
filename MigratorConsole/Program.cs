@@ -16,7 +16,9 @@ namespace MigratorConsole
 
             var migrationServiceFactory = new MigrationServiceFactory();
 
-            var migratorCommands = new MigratorCommands(consoleWrapper, migrationServiceFactory);
+            var activatorFacade = new ActivatorFacade();
+
+            var migratorCommands = new MigratorCommands(consoleWrapper, migrationServiceFactory, activatorFacade);
 
             var migratorCommandLineParser = new MigratorCommandLineParser<MigratorCommandLineParserModel>();
 
