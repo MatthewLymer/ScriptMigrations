@@ -46,7 +46,7 @@ namespace MigratorConsole.CommandLine
 
         private static bool MatchQualifiedName(string qualifiedName)
         {
-            return string.IsNullOrWhiteSpace(qualifiedName) || Regex.IsMatch(qualifiedName, @"^\w+,\s*\w+$");
+            return string.IsNullOrWhiteSpace(qualifiedName) || Regex.IsMatch(qualifiedName, @"^\w+,\s*[\w.+]+$");
         }
 
         private static bool IsMigratingDown(MigratorCommandLineParserModel model)

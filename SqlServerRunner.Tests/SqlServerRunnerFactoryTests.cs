@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Migrator.Runners;
 using NUnit.Framework;
 
 namespace SqlServerRunner.Tests
@@ -11,34 +9,14 @@ namespace SqlServerRunner.Tests
         public class WhenCreatingAnSqlServerRunnerFactoryInstance
         {
             [Test]
-            [ExpectedException(typeof(ArgumentNullException))]
-            public void ShouldThrowExceptionIfNoConfigurationArgumentsPassed()
-            {
-                Assert.IsNotNull(new SqlServerRunnerFactory(null));
-            }
-
-            [Test]
-            [Ignore]
             [TestCase(null)]
             [TestCase("")]
             [TestCase("    ")]
+            [ExpectedException(typeof(ArgumentException))]
             public void ShouldThrowExceptionIfNoConnectionStringValueIsSet(string connectionString)
             {
-                throw new NotImplementedException();
+                Assert.IsNotNull(new SqlServerRunnerFactory(connectionString));
             }
-        }
-    }
-
-    internal class SqlServerRunnerFactory : IRunnerFactory
-    {
-        public SqlServerRunnerFactory(IEnumerable<KeyValuePair<string, string>> configuration)
-        {
-            throw new ArgumentNullException("configuration");
-        }
-
-        public IRunner Create()
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -156,8 +156,8 @@ namespace MigratorConsole.Tests.CommandLine
             [Test]
             [TestCase(false, false, false, null, "", "", "")]
             [TestCase(true, false, false, null, "", "", "")]
-            [TestCase(false, true, false, null, "assembly, type", "C:/windows", "server=blah")]
-            [TestCase(false, false, true, 0L, "assembly, type", "C:/windows", "server=blah")]
+            [TestCase(false, true, false, null, "assembly, namespace.type", "C:/windows", "server=blah")]
+            [TestCase(false, false, true, 0L, "assembly, namespace.class+type", "C:/windows", "server=blah")]
             [TestCase(false, false, true, 5L, "assembly, type", "C:/windows", "server=blah")]
             public void ShouldBeValid(bool showHelp, bool migrateUp, bool migrateDown, long? version, string runnerQualifiedName, string scriptsPath, string connectionString)
             {

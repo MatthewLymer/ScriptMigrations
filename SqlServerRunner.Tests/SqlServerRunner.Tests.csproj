@@ -65,6 +65,10 @@
       <Project>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</Project>
       <Name>Migrator</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SqlServerRunner\SqlServerRunner.csproj">
+      <Project>{B055C78E-B031-4CB2-963D-155BCEBD1958}</Project>
+      <Name>SqlServerRunner</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
