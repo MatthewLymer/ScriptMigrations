@@ -3,19 +3,23 @@ using Migrator.Runners;
 
 namespace SqlServerRunner
 {
-    public class SqlServerRunnerFactory : IRunnerFactory
+    public class RunnerFactory : IRunnerFactory
     {
-        public SqlServerRunnerFactory(string connectionString)
+        private readonly string _connectionString;
+
+        public RunnerFactory(string connectionString)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new ArgumentException("connection string must not be empty", "connectionString");
             }
+
+            _connectionString = connectionString;
         }
 
         public IRunner Create()
         {
-            throw new NotImplementedException();
+            return new Runner(_connectionString);
         }
     }
 }

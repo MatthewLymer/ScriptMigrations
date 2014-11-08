@@ -179,14 +179,14 @@ namespace MigratorConsole.Tests
             [Test]
             [TestCase(1, "my-script")]
             [TestCase(2, "your-script")]
-            public void ShouldWriteWhenUpScriptStartedEventFires(long version, string scriptName)
+            public void ShouldWriteWhenScriptStarts(long version, string scriptName)
             {
                 var mockMigrationService = new Mock<IMigrationService>();
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
 
-                var eventArgs = new UpScriptStartedEventArgs(version, scriptName);
-                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnUpScriptStarted += null, eventArgs));
+                var eventArgs = new ScriptStartedEventArgs(version, scriptName);
+                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnScriptStarted += null, eventArgs));
 
                 Commands.MigrateUp(RunnerQualifiedName, ConnectionString, ScriptsPath);
 
@@ -194,13 +194,13 @@ namespace MigratorConsole.Tests
             }
 
             [Test]
-            public void ShouldWriteWhenUpScriptCompletedEventFires()
+            public void ShouldWriteWhenScriptCompletes()
             {
                 var mockMigrationService = new Mock<IMigrationService>();
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
 
-                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnUpScriptCompleted += null, EventArgs.Empty));
+                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnScriptCompleted += null, EventArgs.Empty));
 
                 Commands.MigrateUp(RunnerQualifiedName, ConnectionString, ScriptsPath);
 
@@ -249,16 +249,38 @@ namespace MigratorConsole.Tests
 
                 Commands.MigrateDown(RunnerQualifiedName, connectionString, scriptsPath, version);
 
-                if (version > 0)
-                {
-                    mockMigrationService.Verify(x => x.DownToVersion(version), Times.Once);
-                    mockMigrationService.Verify(x => x.DownToZero(), Times.Never);   
-                }
-                else
-                {
-                    mockMigrationService.Verify(x => x.DownToZero(), Times.Once);
-                    mockMigrationService.Verify(x => x.DownToVersion(It.IsAny<long>()), Times.Never);
-                }
+                mockMigrationService.Verify(x => x.Down(version), Times.Once);
+            }
+
+            [Test]
+            [TestCase(1, "my-script")]
+            [TestCase(2, "your-script")]
+            public void ShouldWriteWhenScriptStarts(long version, string scriptName)
+            {
+                var mockMigrationService = new Mock<IMigrationService>();
+
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+
+                var eventArgs = new ScriptStartedEventArgs(version, scriptName);
+                mockMigrationService.Setup(x => x.Down(version)).Callback(() => mockMigrationService.Raise(x => x.OnScriptStarted += null, eventArgs));
+
+                Commands.MigrateDown(RunnerQualifiedName, ConnectionString, ScriptsPath, version);
+
+                MockConsoleWrapper.Verify(x => x.Write(Resources.StartingMigrationMessageFormat, version, scriptName));                
+            }
+
+            [Test]
+            public void ShouldWriteWhenScriptCompletes()
+            {
+                var mockMigrationService = new Mock<IMigrationService>();
+
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+
+                mockMigrationService.Setup(x => x.Down(0)).Callback(() => mockMigrationService.Raise(x => x.OnScriptCompleted += null, EventArgs.Empty));
+
+                Commands.MigrateDown(RunnerQualifiedName, ConnectionString, ScriptsPath, 0);
+
+                MockConsoleWrapper.Verify(x => x.WriteLine(Resources.CompletedMigrationMessage));
             }
         }
     }

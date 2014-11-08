@@ -11,7 +11,7 @@ namespace MigratorConsole.Tests
         {
             private static MigratorCommandLineParserModel ParseCommandLine(string commandLine)
             {
-                var args = CommandLineSplitter.CommandLineToArgs("foo.exe " + commandLine);
+                var args = NativeMethods.CommandLineToArgs("foo.exe " + commandLine);
 
                 var parser = new MigratorCommandLineParser<MigratorCommandLineParserModel>();
 

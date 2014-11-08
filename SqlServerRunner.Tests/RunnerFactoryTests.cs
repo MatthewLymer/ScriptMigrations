@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace SqlServerRunner.Tests
 {
-    internal class SqlServerRunnerFactoryTests
+    internal class RunnerFactoryTests
     {
         [TestFixture]
         public class WhenCreatingAnSqlServerRunnerFactoryInstance
@@ -15,7 +15,7 @@ namespace SqlServerRunner.Tests
             [ExpectedException(typeof(ArgumentException))]
             public void ShouldThrowExceptionIfNoConnectionStringValueIsSet(string connectionString)
             {
-                Assert.IsNotNull(new SqlServerRunnerFactory(connectionString));
+                Assert.IsNotNull(new RunnerFactory(connectionString));
             }
         }
     }

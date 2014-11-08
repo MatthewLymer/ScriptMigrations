@@ -12,15 +12,15 @@ namespace Migrator
         private readonly IScriptFinder _scriptFinder;
         private readonly IRunnerFactory _runnerFactory;
 
-        public event Action<object, UpScriptStartedEventArgs> OnUpScriptStarted;
-        public event Action<object, EventArgs> OnUpScriptCompleted;
+        public event EventHandler<ScriptStartedEventArgs> OnScriptStarted;
+        public event EventHandler<EventArgs> OnScriptCompleted;
 
         public MigrationService(IScriptFinder scriptFinder, IRunnerFactory runnerFactory)
         {
             _scriptFinder = scriptFinder;
             _runnerFactory = runnerFactory;
 
-            OnUpScriptStarted += (o, args) => { };
+            OnScriptStarted += (o, args) => { };
         }
 
         public void Up()
@@ -38,46 +38,24 @@ namespace Migrator
 
                 foreach (var migration in ExcludeExecutedUpScripts(upScripts, executedMigrations).OrderBy(x => x.Version))
                 {
-                    RaiseEvent(OnUpScriptStarted, this, new UpScriptStartedEventArgs(migration.Version, migration.Name));
+                    RaiseEvent(OnScriptStarted, this, new ScriptStartedEventArgs(migration.Version, migration.Name));
 
                     runner.ExecuteUpScript(migration);
 
-                    RaiseEvent(OnUpScriptCompleted, this, EventArgs.Empty);
+                    RaiseEvent(OnScriptCompleted, this, EventArgs.Empty);
                 }
 
                 runner.Commit();
             }
         }
 
-        public void DownToZero()
+        public void Down(long version)
         {
-            PerformDown(0);
-        }
-
-        public void DownToVersion(long version)
-        {
-            if (version <= 0)
+            if (version < 0)
             {
                 throw new ArgumentOutOfRangeException("version");
             }
 
-            PerformDown(version);
-        }
-
-        private List<UpScript> GetAndVerifyUpScripts()
-        {
-            var upScripts = _scriptFinder.GetUpScripts().ToList();
-
-            if (upScripts.GroupBy(u => u.Version).Any(g => g.Count() > 1))
-            {
-                throw new DuplicateMigrationVersionException();
-            }
-
-            return upScripts;
-        }
-
-        private void PerformDown(long version)
-        {
             using (var runner = _runnerFactory.Create())
             {
                 var executedMigrations = runner.GetExecutedMigrations().ToList();
@@ -91,6 +69,18 @@ namespace Migrator
 
                 runner.Commit();
             }
+        }
+
+        private List<UpScript> GetAndVerifyUpScripts()
+        {
+            var upScripts = _scriptFinder.GetUpScripts().ToList();
+
+            if (upScripts.GroupBy(u => u.Version).Any(g => g.Count() > 1))
+            {
+                throw new DuplicateMigrationVersionException();
+            }
+
+            return upScripts;
         }
 
         private IEnumerable<DownScript> GetAndVerifyDownScripts()
@@ -116,18 +106,22 @@ namespace Migrator
             
             foreach (var executedMigration in migrationsToRemove.OrderByDescending(x => x))
             {
-                DownScript downScript;
+                DownScript migration;
                 
-                if (!downScripts.TryGetValue(executedMigration, out downScript))
+                if (!downScripts.TryGetValue(executedMigration, out migration))
                 {
                     throw new MigrationScriptMissingException();
                 }
 
-                runner.ExecuteDownScript(downScript);
+                RaiseEvent(OnScriptStarted, this, new ScriptStartedEventArgs(migration.Version, migration.Name));
+
+                runner.ExecuteDownScript(migration);
+
+                RaiseEvent(OnScriptCompleted, this, EventArgs.Empty);
             }
         }
 
-        private static void RaiseEvent<T>(Action<object, T> @event, object sender, T args)
+        private static void RaiseEvent<T>(EventHandler<T> @event, object sender, T args) where T : EventArgs
         {
             if (@event != null)
             {

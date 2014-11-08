@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace MigratorConsole.Tests.CommandLine
 {
-    internal static class CommandLineSplitter
+    internal static class NativeMethods
     {
         [DllImport("shell32.dll", SetLastError = true)]
         static private extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);

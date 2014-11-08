@@ -68,6 +68,7 @@ namespace MigratorConsole
         }
     }
 
+    [Serializable]
     internal class QualifiedNameBadFormatException : ArgumentException
     {
         public QualifiedNameBadFormatException(string paramName)

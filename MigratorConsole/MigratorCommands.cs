@@ -43,7 +43,7 @@ namespace MigratorConsole
                 runnerQualifiedName,
                 connectionString,
                 scriptsPath,
-                ExecuteUp);
+                service => service.Up());
         }
 
         public void MigrateDown(string runnerQualifiedName, string connectionString, string scriptsPath, long version)
@@ -52,7 +52,7 @@ namespace MigratorConsole
                 runnerQualifiedName, 
                 connectionString, 
                 scriptsPath,
-                service => ExecuteDown(service, version));
+                service => service.Down(version));
         }
 
         private void InvokeServiceIfConstructable(string runnerQualifiedName, string connectionString, string scriptsPath, Action<IMigrationService> action)
@@ -68,35 +68,18 @@ namespace MigratorConsole
 
             var service = _migrationServiceFactory.Create(scriptsPath, result.Instance);
 
+            service.OnScriptStarted += OnScriptStarted;
+            service.OnScriptCompleted += OnScriptCompleted;
+
             action(service);
         }
 
-        private void ExecuteUp(IMigrationService service)
-        {
-            service.OnUpScriptStarted += OnUpScriptStarted;
-            service.OnUpScriptCompleted += OnUpScriptCompleted;
-
-            service.Up();
-        }
-
-        private static void ExecuteDown(IMigrationService service, long version)
-        {
-            if (version > 0)
-            {
-                service.DownToVersion(version);
-            }
-            else
-            {
-                service.DownToZero();
-            }
-        }
-
-        private void OnUpScriptStarted(object sender, UpScriptStartedEventArgs args)
+        private void OnScriptStarted(object sender, ScriptStartedEventArgs args)
         {
             _consoleWrapper.Write(Resources.StartingMigrationMessageFormat, args.Version, args.ScriptName);
         }
 
-        private void OnUpScriptCompleted(object sender, EventArgs args)
+        private void OnScriptCompleted(object sender, EventArgs args)
         {
             _consoleWrapper.WriteLine(Resources.CompletedMigrationMessage);
         }

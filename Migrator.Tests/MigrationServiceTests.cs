@@ -82,12 +82,12 @@ namespace Migrator.Tests
                     }
 
                     [Test]
-                    public void ShouldFireUpScriptStartedEventBeforeInvokingRunner()
+                    public void ShouldFireScriptStartedEventBeforeInvokingRunner()
                     {
                         var eventFired = false;
                         var upScriptFired = false;
 
-                        _migrationService.OnUpScriptStarted += (o, args) =>
+                        _migrationService.OnScriptStarted += (o, args) =>
                         {
                             Assert.AreEqual(_migrationService, o);
                             Assert.AreEqual(_upScript.Version, args.Version);
@@ -104,12 +104,12 @@ namespace Migrator.Tests
                     }
 
                     [Test]
-                    public void ShouldFireUpScriptCompletedEventAfterInvokingRunner()
+                    public void ShouldFireScriptCompletedEventAfterInvokingRunner()
                     {
                         var eventFired = false;
                         var upScriptFired = false;
 
-                        _migrationService.OnUpScriptCompleted += (o, args) =>
+                        _migrationService.OnScriptCompleted += (o, args) =>
                         {
                             Assert.AreEqual(_migrationService, o);
                             Assert.AreEqual(EventArgs.Empty, args);
@@ -329,6 +329,22 @@ namespace Migrator.Tests
                 public class WhenTellingTheMigrationServiceToPerformADownToZero : GivenThereIsACompleteSetOfDownScripts
                 {
                     [Test]
+                    public void ShouldThrowExceptionIfVersionIsOutOfRange()
+                    {
+                        try
+                        {
+                            // act
+                            _migrationService.Down(-1);
+                            Assert.Fail();
+                        }
+                        catch (ArgumentOutOfRangeException e)
+                        {
+                            // assert
+                            Assert.AreEqual("version", e.ParamName);
+                        }
+                    }
+                    
+                    [Test]
                     public void ShouldNotCommitIfThereWasAnExceptionWhenExecutingMigration()
                     {
                         // arrange
@@ -338,7 +354,7 @@ namespace Migrator.Tests
                         // act
                         try
                         {
-                            _migrationService.DownToZero();
+                            _migrationService.Down(0);
                             Assert.Fail();
                         }
                         catch (MigrationFailedException)
@@ -355,11 +371,59 @@ namespace Migrator.Tests
                         EnsureDownScriptsExecutedInDescendingOrder();
 
                         // act
-                        _migrationService.DownToZero();
+                        _migrationService.Down(0);
 
                         // assert
                         _mockRunner.Verify(x => x.ExecuteDownScript(It.IsAny<DownScript>()), Times.Exactly(3));
                         _mockRunner.Verify(x => x.Commit(), Times.Once);
+                    }
+
+                    [Test]
+                    public void ShouldFireScriptStartedEventBeforeInvokingRunner()
+                    {
+                        var scriptsFired = new List<long>();
+                        var eventsFired = new List<long>();
+                        
+                        _migrationService.OnScriptStarted += (o, args) =>
+                        {
+                            Assert.AreEqual(_migrationService, o);
+
+                            var script = _downScripts.Single(s => s.Version == args.Version);
+                            
+                            Assert.AreEqual(script.Version, args.Version);
+                            Assert.AreEqual(script.Name, args.ScriptName);
+                            Assert.IsFalse(scriptsFired.Contains(args.Version));
+                            eventsFired.Add(args.Version);
+                        };
+
+                        _mockRunner.Setup(x => x.ExecuteDownScript(It.IsAny<DownScript>())).Callback<DownScript>(ds => scriptsFired.Add(ds.Version));
+
+                        _migrationService.Down(0);
+
+                        Assert.IsTrue(_downScripts.All(ds => eventsFired.Contains(ds.Version)));
+                    }
+
+                    [Test]
+                    public void ShouldFireScriptCompletedEventAfterInvokingRunner()
+                    {
+                        var eventFiredCount = 0;
+                        var scriptFired = false;
+
+                        _migrationService.OnScriptCompleted += (o, args) =>
+                        {
+                            Assert.AreEqual(_migrationService, o);
+                            Assert.AreEqual(EventArgs.Empty, args);
+                            Assert.IsTrue(scriptFired);
+
+                            eventFiredCount++;
+                            scriptFired = false;
+                        };
+
+                        _mockRunner.Setup(x => x.ExecuteDownScript(It.IsAny<DownScript>())).Callback(() => scriptFired = true);
+
+                        _migrationService.Down(0);
+
+                        Assert.AreEqual(_downScripts.Count, eventFiredCount);
                     }
                 }
 
@@ -367,28 +431,12 @@ namespace Migrator.Tests
                 public class WhenTellingTheMigrationServiceToPerformADownToASpecificVersion : GivenThereIsACompleteSetOfDownScripts
                 {
                     [Test]
-                    public void ShouldThrowExceptionIfVersionIsLessThanOne()
-                    {
-                        try
-                        {
-                            // act
-                            _migrationService.DownToVersion(0);
-                            Assert.Fail();
-                        }
-                        catch (ArgumentException e)
-                        {
-                            // assert
-                            Assert.AreEqual("version", e.ParamName);
-                        }
-                    }
-
-                    [Test]
                     public void ShouldThrowExceptionIfVersionRequestedDoesNotExist()
                     {
                         try
                         {
                             // act
-                            _migrationService.DownToVersion(15);
+                            _migrationService.Down(15);
                             Assert.Fail();
                         }
                         catch (VersionNeverExecutedException)
@@ -407,7 +455,7 @@ namespace Migrator.Tests
                         EnsureDownScriptsExecutedInDescendingOrder();
 
                         // act
-                        _migrationService.DownToVersion(requestedVersion);
+                        _migrationService.Down(requestedVersion);
 
                         // assert
                         foreach (var executedMigration in _executedMigrations)
@@ -452,7 +500,7 @@ namespace Migrator.Tests
                         try
                         {
                             // act
-                            _migrationService.DownToZero();
+                            _migrationService.Down(0);
                             Assert.Fail();
                         }
                         catch (MigrationScriptMissingException)
@@ -473,7 +521,7 @@ namespace Migrator.Tests
                         try
                         {
                             // act
-                            _migrationService.DownToZero();
+                            _migrationService.Down(0);
                             Assert.Fail();
                         }
                         catch (DuplicateMigrationVersionException)
@@ -493,7 +541,7 @@ namespace Migrator.Tests
                         try
                         {
                             // act
-                            _migrationService.DownToVersion(10);
+                            _migrationService.Down(10);
                             Assert.Fail();
                         }
                         catch (MigrationScriptMissingException)
