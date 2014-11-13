@@ -6,8 +6,8 @@
     <ProjectGuid>{77244B97-E8EF-4B0D-B7C3-2C0C25C2987D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SqlServerRunner.Tests</RootNamespace>
-    <AssemblyName>SqlServerRunner.Tests</AssemblyName>
+    <RootNamespace>SqlServerMigrator.Tests</RootNamespace>
+    <AssemblyName>SqlServerMigrator.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -65,9 +65,9 @@
       <Project>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</Project>
       <Name>Migrator</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SqlServerRunner\SqlServerRunner.csproj">
+    <ProjectReference Include="..\SqlServerMigrator\SqlServerMigrator.csproj">
       <Project>{B055C78E-B031-4CB2-963D-155BCEBD1958}</Project>
-      <Name>SqlServerRunner</Name>
+      <Name>SqlServerMigrator</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

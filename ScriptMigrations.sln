@@ -12,9 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3889E6
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerRunner", "SqlServerRunner\SqlServerRunner.csproj", "{B055C78E-B031-4CB2-963D-155BCEBD1958}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerMigrator", "SqlServerMigrator\SqlServerMigrator.csproj", "{B055C78E-B031-4CB2-963D-155BCEBD1958}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerRunner.Tests", "SqlServerRunner.Tests\SqlServerRunner.Tests.csproj", "{77244B97-E8EF-4B0D-B7C3-2C0C25C2987D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerMigrator.Tests", "SqlServerMigrator.Tests\SqlServerMigrator.Tests.csproj", "{77244B97-E8EF-4B0D-B7C3-2C0C25C2987D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigratorConsole", "MigratorConsole\MigratorConsole.csproj", "{21889C3D-D9C4-40D6-A4E4-971735D19EE2}"
 EndProject

@@ -7,8 +7,8 @@
     <ProjectGuid>{B055C78E-B031-4CB2-963D-155BCEBD1958}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SqlServerRunner</RootNamespace>
-    <AssemblyName>SqlServerRunner</AssemblyName>
+    <RootNamespace>SqlServerMigrator</RootNamespace>
+    <AssemblyName>SqlServerMigrator</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
