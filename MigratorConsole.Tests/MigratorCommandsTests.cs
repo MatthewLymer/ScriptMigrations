@@ -7,6 +7,8 @@ using MigratorConsole.Wrappers;
 using Moq;
 using NUnit.Framework;
 
+// ReSharper disable ImplicitlyCapturedClosure
+
 namespace MigratorConsole.Tests
 {
     class MigratorCommandsTests
@@ -262,6 +264,7 @@ namespace MigratorConsole.Tests
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
 
                 var eventArgs = new ScriptStartedEventArgs(version, scriptName);
+
                 mockMigrationService.Setup(x => x.Down(version)).Callback(() => mockMigrationService.Raise(x => x.OnScriptStarted += null, eventArgs));
 
                 Commands.MigrateDown(RunnerQualifiedName, ConnectionString, ScriptsPath, version);

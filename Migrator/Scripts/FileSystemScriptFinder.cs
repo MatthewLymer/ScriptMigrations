@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using Migrator.Facades;
@@ -42,10 +43,7 @@ namespace Migrator.Scripts
             {
                 var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
 
-                if (fileNameWithoutExtension == null)
-                {
-                    continue;
-                }
+                Debug.Assert(fileNameWithoutExtension != null);
 
                 if (!regex.IsMatch(fileNameWithoutExtension))
                 {

@@ -1,19 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlClient;
-using Migrator.Runners;
-using Migrator.Scripts;
+using Migrator;
 
-namespace SqlServerRunner
+namespace SqlServerMigrator
 {
-    internal class Runner : IRunner
+    internal sealed class Runner : HistoryTableRunnerTemplate
     {
         private const string HistoryTableName = "_MigrationHistory";
-
-        private const string CreateTableHistoryFormat = @"
-CREATE TABLE [dbo].[{0}](
-    [Version] BIGINT NOT NULL PRIMARY KEY,
-    [ScriptName] NVARCHAR(255) NOT NULL
-)";
+        private const string InsertHistoryRecordFormat = "INSERT INTO [dbo].[{0}](Version, ScriptName) VALUES(@version, @scriptName)";
+        private const string DeleteHistoryRecordFormat = "DELETE FROM [dbo].[{0}] WHERE Version=@version";
+        private const string GetHistoryFormat = "SELECT Version FROM [dbo].[{0}]";
+        private const string CreateTableHistoryFormat = @"CREATE TABLE [dbo].[{0}]([Version] BIGINT NOT NULL PRIMARY KEY, [ScriptName] NVARCHAR(255) NOT NULL)";
+        private const string IsHistoryTableInSchemaFormat = "SELECT COUNT(*) FROM [sys].[tables] WHERE Name = @tableName";
 
         private readonly SqlConnection _connection;
         private readonly SqlTransaction _transaction;
@@ -24,101 +22,102 @@ CREATE TABLE [dbo].[{0}](
             _connection.Open();
 
             _transaction = _connection.BeginTransaction();
-
-            if (!IsHistoryTableExistant())
-            {
-                CreateHistoryTable();
-            }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             _transaction.Dispose();
             _connection.Dispose();
         }
 
-        public void Commit()
+        public override void Commit()
         {
             _transaction.Commit();
         }
 
-        public void ExecuteUpScript(UpScript script)
+        protected override void ExecuteScript(string content)
         {
-            using (var command = _connection.CreateCommand())
+            using (var command = CreateCommandInTransaction())
             {
-                command.CommandText = script.Content;
-                command.ExecuteNonQuery();
-            }
-
-            using (var command = _connection.CreateCommand())
-            {
-                const string insertFormat = "INSERT INTO [dbo].[{0}](Version, ScriptName) VALUES(@version, @scriptName)";
-                command.CommandText = string.Format(insertFormat, HistoryTableName);
-
-                command.Parameters.AddWithValue("@version", script.Version);
-                command.Parameters.AddWithValue("@scriptName", script.Name);
+                command.CommandText = content;
 
                 command.ExecuteNonQuery();
             }
         }
 
-        public void ExecuteDownScript(DownScript script)
+        protected override void InsertHistoryRecord(long version, string name)
         {
-            using (var command = _connection.CreateCommand())
+            using (var command = CreateCommandInTransaction())
             {
-                command.CommandText = script.Content;
-                command.ExecuteNonQuery();
-            }
+                command.CommandText = string.Format(InsertHistoryRecordFormat, HistoryTableName);
 
-            using (var command = _connection.CreateCommand())
-            {
-                const string deleteFormat = "DELETE FROM [dbo].[{0}] WHERE Version=@version";
-                command.CommandText = string.Format(deleteFormat, HistoryTableName);
-
-                command.Parameters.AddWithValue("@version", script.Version);
+                command.Parameters.AddWithValue("@version", version);
+                command.Parameters.AddWithValue("@scriptName", name);
 
                 command.ExecuteNonQuery();
             }
         }
 
-        public IEnumerable<long> GetExecutedMigrations()
+        protected override void DeleteHistoryRecord(long version)
         {
-            var versions = new List<long>();
-
-            using (var command = _connection.CreateCommand())
+            using (var command = CreateCommandInTransaction())
             {
-                command.CommandText = string.Format("SELECT [Version] FROM [dbo].[{0}]", HistoryTableName);
-                
+                command.CommandText = string.Format(DeleteHistoryRecordFormat, HistoryTableName);
+
+                command.Parameters.AddWithValue("@version", version);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        protected override IEnumerable<long> GetHistory()
+        {
+            using (var command = CreateCommandInTransaction())
+            {
+                command.CommandText = string.Format(GetHistoryFormat, HistoryTableName);
+
                 using (var reader = command.ExecuteReader())
                 {
+                    var history = new List<long>();
+
                     while (reader.Read())
                     {
-                        versions.Add((long) reader["Version"]);
+                        history.Add((long)reader["Version"]);
                     }
+
+                    return history;
                 }
             }
-
-            return versions;
         }
 
-        private void CreateHistoryTable()
+        protected override bool IsHistoryTableInSchema()
         {
-            using (var command = _connection.CreateCommand())
+            using (var command = CreateCommandInTransaction())
+            {
+                command.CommandText = IsHistoryTableInSchemaFormat;
+                command.Parameters.AddWithValue("@tableName", HistoryTableName);
+
+                return (int)command.ExecuteScalar() > 0;
+            }            
+        }
+
+        protected override void CreateHistoryTable()
+        {
+            using (var command = CreateCommandInTransaction())
             {
                 command.CommandText = string.Format(CreateTableHistoryFormat, HistoryTableName);
+
                 command.ExecuteNonQuery();
             }
         }
 
-        private bool IsHistoryTableExistant()
+        private SqlCommand CreateCommandInTransaction()
         {
-            using (var command = _connection.CreateCommand())
-            {
-                command.CommandText = "select count(*) from [sys].[tables] where name = @tableName";
-                command.Parameters.AddWithValue("@tableName", HistoryTableName);
+            var command = _connection.CreateCommand();
 
-                return (long)command.ExecuteScalar() > 0;
-            }
+            command.Transaction = _transaction;
+
+            return command;
         }
     }
 }

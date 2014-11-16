@@ -7,6 +7,8 @@ using Migrator.Scripts;
 using Moq;
 using NUnit.Framework;
 
+// ReSharper disable ImplicitlyCapturedClosure
+
 namespace Migrator.Tests
 {
     internal class MigrationServiceTests

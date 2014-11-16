@@ -1,7 +1,7 @@
 ﻿using System;
 using Migrator.Runners;
 
-namespace SqlServerRunner
+namespace SqlServerMigrator
 {
     public class RunnerFactory : IRunnerFactory
     {

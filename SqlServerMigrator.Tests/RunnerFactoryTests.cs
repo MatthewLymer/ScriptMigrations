@@ -1,7 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 
-namespace SqlServerRunner.Tests
+namespace SqlServerMigrator.Tests
 {
     internal class RunnerFactoryTests
     {

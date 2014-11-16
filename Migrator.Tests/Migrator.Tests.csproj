@@ -57,6 +57,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="HistoryPersistingRunnerTemplateTests.cs" />
     <Compile Include="Scripts\FileSystemScriptFinderTests.cs" />
     <Compile Include="MigrationServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
