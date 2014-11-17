@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
 
 namespace SqlServerMigrator.Tests
@@ -50,46 +48,16 @@ namespace SqlServerMigrator.Tests
             }
 
             [Test]
-            [Ignore]
             [TestCase("set @var = '\nGO\n'")]
             [TestCase("set @var = '''\nGO\n'")]
+            [TestCase("set @var = '\nGO\n")]
             public void ShouldIgnoreGoStatementsInMultilineStrings(string script)
             {
-                var batch = _splitter.Split(script).Single();
+                var batches = _splitter.Split(script).ToList();
 
-                Assert.AreEqual(script, batch);
+                Assert.AreEqual(1, batches.Count);
+                Assert.AreEqual(script, batches[0]);
             }
-        }
-    }
-
-    internal class SqlBatchSplitter
-    {
-        private static readonly Regex GoOnNewLineRegex = new Regex(@"^\s*GO\s+", RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-
-        public IEnumerable<string> Split(string script)
-        {
-            if (script == null)
-            {
-                throw new ArgumentNullException("script");
-            }
-
-            return SplitImpl(script);
-        }
-
-        private static IEnumerable<string> SplitImpl(string script)
-        {
-            var start = 0;
-
-            var matches = GoOnNewLineRegex.Matches(script);
-
-            foreach (Match match in matches)
-            {
-                yield return script.Substring(start, match.Index - start);
-
-                start = match.Index + match.Length;
-            }
-
-            yield return script.Substring(start);
         }
     }
 }

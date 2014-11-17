@@ -13,6 +13,8 @@ namespace SqlServerMigrator
         private const string CreateTableHistoryFormat = @"CREATE TABLE [dbo].[{0}]([Version] BIGINT NOT NULL PRIMARY KEY, [ScriptName] NVARCHAR(255) NOT NULL)";
         private const string IsHistoryTableInSchemaFormat = "SELECT COUNT(*) FROM [sys].[tables] WHERE Name = @tableName";
 
+        private static readonly SqlBatchSplitter BatchSplitter = new SqlBatchSplitter();
+
         private readonly SqlConnection _connection;
         private readonly SqlTransaction _transaction;
 
@@ -35,13 +37,16 @@ namespace SqlServerMigrator
             _transaction.Commit();
         }
 
-        protected override void ExecuteScript(string content)
+        protected override void ExecuteScript(string script)
         {
-            using (var command = CreateCommandInTransaction())
+            foreach (var batch in BatchSplitter.Split(script))
             {
-                command.CommandText = content;
+                using (var command = CreateCommandInTransaction())
+                {
+                    command.CommandText = batch;
 
-                command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
+                }
             }
         }
 

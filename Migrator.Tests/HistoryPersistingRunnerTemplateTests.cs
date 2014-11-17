@@ -273,9 +273,9 @@ namespace Migrator.Tests
                 _invocations.Add(new Invocation(MethodBase.GetCurrentMethod().Name));
             }
 
-            protected override void ExecuteScript(string content)
+            protected override void ExecuteScript(string script)
             {
-                _invocations.Add(new Invocation(MethodBase.GetCurrentMethod().Name, content));
+                _invocations.Add(new Invocation(MethodBase.GetCurrentMethod().Name, script));
             }
 
             protected override IEnumerable<long> GetHistory()

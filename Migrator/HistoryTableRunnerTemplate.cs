@@ -48,7 +48,7 @@ namespace Migrator
 
         public abstract void Commit();
 
-        protected abstract void ExecuteScript(string content);
+        protected abstract void ExecuteScript(string script);
 
         protected abstract void InsertHistoryRecord(long version, string name);
 
