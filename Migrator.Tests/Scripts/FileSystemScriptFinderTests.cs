@@ -98,6 +98,16 @@ namespace Migrator.Tests.Scripts
                         Assert.AreEqual(Name, script.Name);
                         Assert.AreEqual(Content, script.Content);
                     }
+
+                    [Test]
+                    public void ShouldNotAccessFilesystemIfContentPropertyIsNotRead()
+                    {
+                        var scripts = _scriptFinder.GetUpScripts();
+
+                        Assert.IsNotEmpty(scripts);
+
+                        _mockFileSystemFacade.Verify(x => x.ReadAllText(It.IsAny<string>()), Times.Never);
+                    }
                 }
             }
 
@@ -166,6 +176,16 @@ namespace Migrator.Tests.Scripts
                         Assert.AreEqual(Version, script.Version);
                         Assert.AreEqual(Name, script.Name);
                         Assert.AreEqual(Content, script.Content);                        
+                    }
+
+                    [Test]
+                    public void ShouldNotAccessFilesystemIfContentPropertyIsNotRead()
+                    {
+                        var scripts = _scriptFinder.GetDownScripts();
+
+                        Assert.IsNotEmpty(scripts);
+
+                        _mockFileSystemFacade.Verify(x => x.ReadAllText(It.IsAny<string>()), Times.Never);
                     }
                 }
             }

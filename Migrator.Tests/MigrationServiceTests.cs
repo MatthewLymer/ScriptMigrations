@@ -51,7 +51,7 @@ namespace Migrator.Tests
             private class GivenThereIsOneUpScript : GivenAnEmptyDatabase
             {
                 private Mock<IScriptFinder> _mockScriptFinder;
-                private readonly UpScript _upScript = new UpScript(25, "my-script", "");
+                private readonly UpScript _upScript = new UpScript(25, "my-script", () => "");
 
                 [SetUp]
                 public new void BeforeEachTest()
@@ -169,9 +169,9 @@ namespace Migrator.Tests
                 public new void BeforeEachTest()
                 {
                     _upMigrations = new List<UpScript> {
-                        new UpScript(25, "", ""),
-                        new UpScript(45, "", ""),
-                        new UpScript(13, "", "")
+                        new UpScript(25, "", () => ""),
+                        new UpScript(45, "", () => ""),
+                        new UpScript(13, "", () => "")
                     };
 
                     _mockScriptFinder = new Mock<IScriptFinder>();
@@ -194,7 +194,7 @@ namespace Migrator.Tests
                     public void ShouldThrowExceptionIfMultipleMigrationScriptsHaveTheSameVersion()
                     {
                         // arrange
-                        var duplicatedUpScript = new UpScript(666, "", "");
+                        var duplicatedUpScript = new UpScript(666, "", () => "");
                         _upMigrations.Add(duplicatedUpScript);
                         _upMigrations.Add(duplicatedUpScript);
 
@@ -275,10 +275,10 @@ namespace Migrator.Tests
                 public new void BeforeEachTest()
                 {
                     _upMigrations = new List<UpScript> {
-                        new UpScript(10, "", ""),
-                        new UpScript(15, "", ""),
-                        new UpScript(52, "", ""),
-                        new UpScript(88, "", "")
+                        new UpScript(10, "", () => ""),
+                        new UpScript(15, "", () => ""),
+                        new UpScript(52, "", () => ""),
+                        new UpScript(88, "", () => "")
                     };
 
                     _mockScriptFinder = new Mock<IScriptFinder>();
@@ -315,9 +315,9 @@ namespace Migrator.Tests
                 public new void BeforeEachTest()
                 {
                     _downScripts = new List<DownScript> {
-                        new DownScript(10, "", ""),
-                        new DownScript(52, "", ""),
-                        new DownScript(96, "", "")
+                        new DownScript(10, "", () => ""),
+                        new DownScript(52, "", () => ""),
+                        new DownScript(96, "", () => "")
                     };
 
                     _mockScriptFinder = new Mock<IScriptFinder>();
@@ -482,8 +482,8 @@ namespace Migrator.Tests
                 public new void BeforeEachTest()
                 {
                     _downScripts = new List<DownScript> {
-                        new DownScript(10, "", ""),
-                        new DownScript(96, "", "")
+                        new DownScript(10, "", () => ""),
+                        new DownScript(96, "", () => "")
                     };
 
                     _mockScriptFinder = new Mock<IScriptFinder>();
@@ -516,7 +516,7 @@ namespace Migrator.Tests
                     public void ShouldThrowExceptionIfMultipleMigrationScriptsHaveTheSameVersion()
                     {
                         // arrange
-                        var duplicatedDownScript = new DownScript(666, "", "");
+                        var duplicatedDownScript = new DownScript(666, "", () => "");
                         _downScripts.Add(duplicatedDownScript);
                         _downScripts.Add(duplicatedDownScript);
 

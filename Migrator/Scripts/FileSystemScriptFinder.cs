@@ -60,12 +60,12 @@ namespace Migrator.Scripts
 
         private UpScript CreateUpScript(IList<string> fileSegments, string file)
         {
-            return new UpScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
+            return new UpScript(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystemFacade.ReadAllText(file));
         }
 
         private DownScript CreateDownScript(IList<string> fileSegments, string file)
         {
-            return new DownScript(long.Parse(fileSegments[0]), fileSegments[1], _fileSystemFacade.ReadAllText(file));
+            return new DownScript(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystemFacade.ReadAllText(file));
         }
     }
 }
