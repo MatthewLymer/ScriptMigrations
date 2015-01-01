@@ -19,8 +19,6 @@ namespace Migrator
         {
             _scriptFinder = scriptFinder;
             _runnerFactory = runnerFactory;
-
-            OnScriptStarted += (o, args) => { };
         }
 
         public void Up()
