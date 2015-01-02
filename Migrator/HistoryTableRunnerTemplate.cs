@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Migrator.Migrations;
 using Migrator.Runners;
-using Migrator.Scripts;
 
 namespace Migrator
 {
@@ -16,22 +16,22 @@ namespace Migrator
             _lazyDoesHistoryTableExist = new Lazy<bool>(IsHistoryTableInSchema);
         }
 
-        public void ExecuteUpScript(UpScript script)
+        public void ExecuteUpScript(UpMigration migration)
         {
             CreateHistoryTableIfNonExistant();
 
-            ExecuteScript(script.Content);
+            ExecuteScript(migration.Content);
 
-            InsertHistoryRecord(script.Version, script.Name);
+            InsertHistoryRecord(migration.Version, migration.Name);
         }
 
-        public void ExecuteDownScript(DownScript script)
+        public void ExecuteDownScript(DownMigration migration)
         {
             CreateHistoryTableIfNonExistant();
 
-            ExecuteScript(script.Content);
+            ExecuteScript(migration.Content);
 
-            DeleteHistoryRecord(script.Version);
+            DeleteHistoryRecord(migration.Version);
         }
 
         public IEnumerable<long> GetExecutedMigrations()

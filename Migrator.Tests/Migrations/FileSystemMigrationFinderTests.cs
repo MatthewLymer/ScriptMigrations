@@ -2,27 +2,27 @@
 using System.IO;
 using System.Linq;
 using Migrator.Facades;
-using Migrator.Scripts;
+using Migrator.Migrations;
 using Moq;
 using NUnit.Framework;
 
-namespace Migrator.Tests.Scripts
+namespace Migrator.Tests.Migrations
 {
-    internal class FileSystemScriptFinderTests
+    internal class FileSystemMigrationFinderTests
     {
         private class GivenADirectory
         {
             private const string Path = ".";
 
             private Mock<IFileSystemFacade> _mockFileSystemFacade;
-            private FileSystemScriptFinder _scriptFinder;
+            private FileSystemMigrationFinder _migrationFinder;
 
             [SetUp]
             public void BeforeEachTest()
             {
                 _mockFileSystemFacade = new Mock<IFileSystemFacade>();
 
-                _scriptFinder = new FileSystemScriptFinder(_mockFileSystemFacade.Object, Path);
+                _migrationFinder = new FileSystemMigrationFinder(_mockFileSystemFacade.Object, Path);
             }
 
             private class GivenTheDirectoryIsEmpty : GivenADirectory
@@ -31,7 +31,7 @@ namespace Migrator.Tests.Scripts
                 public new void BeforeEachTest()
                 {
                     _mockFileSystemFacade.Setup(
-                        x => x.GetFiles(Path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                        x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                         .Returns(new string[0]);
                 }
 
@@ -42,7 +42,7 @@ namespace Migrator.Tests.Scripts
                     public void ShouldReturnAnEmptyEnumeration()
                     {
                         // act
-                        IEnumerable<UpScript> upScripts = _scriptFinder.GetUpScripts();
+                        IEnumerable<UpMigration> upScripts = _migrationFinder.GetUpScripts();
 
                         // assert
                         Assert.IsEmpty(upScripts);
@@ -56,7 +56,7 @@ namespace Migrator.Tests.Scripts
                     public void ShouldReturnAnEmptyEnumeration()
                     {
                         // act
-                        var downScripts = _scriptFinder.GetDownScripts();
+                        var downScripts = _migrationFinder.GetDownScripts();
 
                         // assert
                         Assert.IsEmpty(downScripts);
@@ -76,7 +76,7 @@ namespace Migrator.Tests.Scripts
                     string scriptPath = string.Format(@".\{0}_{1}_up.sql", Version, Name);
 
                     _mockFileSystemFacade.Setup(
-                        x => x.GetFiles(Path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                        x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                         .Returns(new[] {scriptPath});
 
                     _mockFileSystemFacade.Setup(x => x.ReadAllText(scriptPath)).Returns(Content);
@@ -89,7 +89,7 @@ namespace Migrator.Tests.Scripts
                     public void ShouldReturnASinglePopulatedUpScript()
                     {
                         // act
-                        var scripts = _scriptFinder.GetUpScripts();
+                        var scripts = _migrationFinder.GetUpScripts();
 
                         // assert
                         var script = scripts.Single();
@@ -102,7 +102,7 @@ namespace Migrator.Tests.Scripts
                     [Test]
                     public void ShouldNotAccessFilesystemIfContentPropertyIsNotRead()
                     {
-                        var scripts = _scriptFinder.GetUpScripts();
+                        var scripts = _migrationFinder.GetUpScripts();
 
                         Assert.IsNotEmpty(scripts);
 
@@ -124,7 +124,7 @@ namespace Migrator.Tests.Scripts
                 {
                     _mockFileSystemFacade.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
                     
-                    _mockFileSystemFacade.Setup(x => x.GetFiles(Path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                    _mockFileSystemFacade.Setup(x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                                          .Returns(_scriptPaths);
                 }
 
@@ -135,7 +135,7 @@ namespace Migrator.Tests.Scripts
                     public void ShouldReturnMultipleUpScripts()
                     {
                         // act
-                        var scripts = _scriptFinder.GetUpScripts();
+                        var scripts = _migrationFinder.GetUpScripts();
 
                         // assert
                         Assert.AreEqual(3, scripts.Count());
@@ -155,7 +155,7 @@ namespace Migrator.Tests.Scripts
                     string filePath = string.Format(@".\{0}_{1}_down.sql", Version, Name);
 
                     _mockFileSystemFacade.Setup(
-                        x => x.GetFiles(Path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                        x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                         .Returns(new[] { filePath });
 
                     _mockFileSystemFacade.Setup(x => x.ReadAllText(filePath)).Returns(Content);                    
@@ -168,7 +168,7 @@ namespace Migrator.Tests.Scripts
                     public void ShouldReturnASinglePopulatedDownScript()
                     {
                         // act
-                        var scripts = _scriptFinder.GetDownScripts();
+                        var scripts = _migrationFinder.GetDownScripts();
 
                         // assert
                         var script = scripts.Single();
@@ -181,7 +181,7 @@ namespace Migrator.Tests.Scripts
                     [Test]
                     public void ShouldNotAccessFilesystemIfContentPropertyIsNotRead()
                     {
-                        var scripts = _scriptFinder.GetDownScripts();
+                        var scripts = _migrationFinder.GetDownScripts();
 
                         Assert.IsNotEmpty(scripts);
 
@@ -203,7 +203,7 @@ namespace Migrator.Tests.Scripts
                 {
                     _mockFileSystemFacade.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
 
-                    _mockFileSystemFacade.Setup(x => x.GetFiles(Path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                    _mockFileSystemFacade.Setup(x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                                          .Returns(_files);
                 }
 
@@ -214,7 +214,7 @@ namespace Migrator.Tests.Scripts
                     public void ShouldReturnMultipleDownScripts()
                     {
                         // act
-                        var scripts = _scriptFinder.GetDownScripts();
+                        var scripts = _migrationFinder.GetDownScripts();
 
                         // assert
                         Assert.AreEqual(3, scripts.Count());
@@ -237,7 +237,7 @@ namespace Migrator.Tests.Scripts
                 {
                     _mockFileSystemFacade.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
 
-                    _mockFileSystemFacade.Setup(x => x.GetFiles(Path, FileSystemScriptFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                    _mockFileSystemFacade.Setup(x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                                          .Returns(_files);
                 }
 
@@ -248,7 +248,7 @@ namespace Migrator.Tests.Scripts
                     public void ShouldOnlyReturnUpScripts()
                     {
                         // act
-                        var scripts = _scriptFinder.GetUpScripts();
+                        var scripts = _migrationFinder.GetUpScripts();
 
                         // assert
                         Assert.AreEqual(1, scripts.Count());
@@ -258,7 +258,7 @@ namespace Migrator.Tests.Scripts
                     public void ShouldOnlyReturnDownScripts()
                     {
                         // act
-                        var scripts = _scriptFinder.GetDownScripts();
+                        var scripts = _migrationFinder.GetDownScripts();
 
                         // assert
                         Assert.AreEqual(1, scripts.Count());

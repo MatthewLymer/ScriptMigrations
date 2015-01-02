@@ -36,20 +36,20 @@
   <ItemGroup>
     <Compile Include="HistoryTableRunnerTemplate.cs" />
     <Compile Include="IMigrationService.cs" />
-    <Compile Include="Scripts\DownScript.cs" />
+    <Compile Include="Migrations\DownMigration.cs" />
     <Compile Include="Exceptions\DuplicateMigrationVersionException.cs" />
-    <Compile Include="Scripts\FileSystemScriptFinder.cs" />
+    <Compile Include="Migrations\FileSystemMigrationFinder.cs" />
     <Compile Include="Facades\IFileSystemFacade.cs" />
     <Compile Include="Runners\IRunner.cs" />
     <Compile Include="Runners\IRunnerFactory.cs" />
-    <Compile Include="Scripts\IScriptFinder.cs" />
+    <Compile Include="Migrations\IMigrationFinder.cs" />
     <Compile Include="Exceptions\MigrationFailedException.cs" />
     <Compile Include="Exceptions\MigrationScriptMissingException.cs" />
     <Compile Include="MigrationService.cs" />
     <Compile Include="Exceptions\VersionNeverExecutedException.cs" />
     <Compile Include="Exceptions\MissingDownMigrationException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scripts\UpScript.cs" />
+    <Compile Include="Migrations\UpMigration.cs" />
     <Compile Include="ScriptCompletedEventArgs.cs" />
     <Compile Include="ScriptStartedEventArgs.cs" />
   </ItemGroup>

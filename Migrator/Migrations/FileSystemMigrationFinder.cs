@@ -5,9 +5,9 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Migrator.Facades;
 
-namespace Migrator.Scripts
+namespace Migrator.Migrations
 {
-    public sealed class FileSystemScriptFinder : IScriptFinder
+    public sealed class FileSystemMigrationFinder : IMigrationFinder
     {
         public const string SqlFileSearchPattern = "*.sql";
 
@@ -17,27 +17,27 @@ namespace Migrator.Scripts
         private readonly IFileSystemFacade _fileSystemFacade;
         private readonly string _path;
 
-        public FileSystemScriptFinder(IFileSystemFacade fileSystemFacade, string path)
+        public FileSystemMigrationFinder(IFileSystemFacade fileSystemFacade, string path)
         {
             _fileSystemFacade = fileSystemFacade;
             _path = path;
         }
 
-        public IEnumerable<UpScript> GetUpScripts()
+        public IEnumerable<UpMigration> GetUpScripts()
         {
             return GetScripts(UpScriptRegex, CreateUpScript);
         }
 
-        public IEnumerable<DownScript> GetDownScripts()
+        public IEnumerable<DownMigration> GetDownScripts()
         {
             return GetScripts(DownScriptRegex, CreateDownScript);
         }
 
-        private IEnumerable<TScript> GetScripts<TScript>(Regex regex, Func<IList<string>, string, TScript> createScript)
+        private IEnumerable<TMigration> GetScripts<TMigration>(Regex regex, Func<IList<string>, string, TMigration> createScript)
         {
             var files = _fileSystemFacade.GetFiles(_path, SqlFileSearchPattern, SearchOption.AllDirectories);
 
-            var scripts = new List<TScript>();
+            var scripts = new List<TMigration>();
 
             foreach (var file in files)
             {
@@ -58,14 +58,14 @@ namespace Migrator.Scripts
             return scripts;
         }
 
-        private UpScript CreateUpScript(IList<string> fileSegments, string file)
+        private UpMigration CreateUpScript(IList<string> fileSegments, string file)
         {
-            return new UpScript(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystemFacade.ReadAllText(file));
+            return new UpMigration(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystemFacade.ReadAllText(file));
         }
 
-        private DownScript CreateDownScript(IList<string> fileSegments, string file)
+        private DownMigration CreateDownScript(IList<string> fileSegments, string file)
         {
-            return new DownScript(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystemFacade.ReadAllText(file));
+            return new DownMigration(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystemFacade.ReadAllText(file));
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Migrator.Scripts;
+using Migrator.Migrations;
 using NUnit.Framework;
 
 namespace Migrator.Tests
@@ -56,7 +56,7 @@ namespace Migrator.Tests
             [Test]
             public void ShouldCreateHistoryTableIfTableDoesNotExist()
             {
-                RunnerTemplate.ExecuteUpScript(new UpScript(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteUpScript(new UpMigration(0, string.Empty, () => string.Empty));
 
                 AssertHistoryTableCreated(RunnerTemplate.Invocations);
             }
@@ -66,7 +66,7 @@ namespace Migrator.Tests
             {
                 RunnerTemplate.DoesHistoryTableExistDefault = true;
 
-                RunnerTemplate.ExecuteUpScript(new UpScript(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteUpScript(new UpMigration(0, string.Empty, () => string.Empty));
 
                 AssertHistoryTableNotCreated(RunnerTemplate.Invocations);
             }
@@ -76,7 +76,7 @@ namespace Migrator.Tests
             [TestCase("delete from bar")]
             public void ShouldExecuteScriptAfterHistoryTableHasBeenEnsured(string scriptContent)
             {
-                RunnerTemplate.ExecuteUpScript(new UpScript(0, string.Empty, () => scriptContent));
+                RunnerTemplate.ExecuteUpScript(new UpMigration(0, string.Empty, () => scriptContent));
 
                 var invocations = RunnerTemplate.Invocations.ToList();
 
@@ -92,7 +92,7 @@ namespace Migrator.Tests
             [TestCase(2, "your-script")]
             public void ShouldInsertHistoryRecordAfterScriptHasBeenExecuted(long version, string name)
             {
-                RunnerTemplate.ExecuteUpScript(new UpScript(version, name, () => string.Empty));
+                RunnerTemplate.ExecuteUpScript(new UpMigration(version, name, () => string.Empty));
 
                 var invocations = RunnerTemplate.Invocations.ToList();
 
@@ -111,7 +111,7 @@ namespace Migrator.Tests
             {
                 RunnerTemplate.DoesHistoryTableExistDefault = doesHistoryTableExistDefault;
 
-                var upScript = new UpScript(0, string.Empty, () => string.Empty);
+                var upScript = new UpMigration(0, string.Empty, () => string.Empty);
 
                 RunnerTemplate.ExecuteUpScript(upScript);
                 RunnerTemplate.ExecuteUpScript(upScript);
@@ -137,7 +137,7 @@ namespace Migrator.Tests
             [Test]
             public void ShouldCreateHistoryTableIfTableDoesNotExist()
             {
-                RunnerTemplate.ExecuteDownScript(new DownScript(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteDownScript(new DownMigration(0, string.Empty, () => string.Empty));
 
                 AssertHistoryTableCreated(RunnerTemplate.Invocations);
             }
@@ -147,7 +147,7 @@ namespace Migrator.Tests
             {
                 RunnerTemplate.DoesHistoryTableExistDefault = true;
 
-                RunnerTemplate.ExecuteDownScript(new DownScript(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteDownScript(new DownMigration(0, string.Empty, () => string.Empty));
 
                 AssertHistoryTableNotCreated(RunnerTemplate.Invocations);
             }
@@ -157,7 +157,7 @@ namespace Migrator.Tests
             [TestCase("delete from bar")]
             public void ShouldExecuteScriptAfterHistoryTableHasBeenEnsured(string scriptContent)
             {
-                RunnerTemplate.ExecuteDownScript(new DownScript(0, string.Empty, () => scriptContent));
+                RunnerTemplate.ExecuteDownScript(new DownMigration(0, string.Empty, () => scriptContent));
 
                 var invocations = RunnerTemplate.Invocations.ToList();
 
@@ -173,7 +173,7 @@ namespace Migrator.Tests
             [TestCase(2)]
             public void ShouldInsertHistoryRecordAfterScriptHasBeenExecuted(long version)
             {
-                RunnerTemplate.ExecuteDownScript(new DownScript(version, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteDownScript(new DownMigration(version, string.Empty, () => string.Empty));
 
                 var invocations = RunnerTemplate.Invocations.ToList();
 
@@ -191,7 +191,7 @@ namespace Migrator.Tests
             {
                 RunnerTemplate.DoesHistoryTableExistDefault = doesHistoryTableExistDefault;
 
-                var script = new DownScript(0, string.Empty, () => string.Empty);
+                var script = new DownMigration(0, string.Empty, () => string.Empty);
 
                 RunnerTemplate.ExecuteDownScript(script);
                 RunnerTemplate.ExecuteDownScript(script);
@@ -240,7 +240,7 @@ namespace Migrator.Tests
             [Test]
             public void ShouldFindHistoryIfUpMigrationExecuted()
             {
-                RunnerTemplate.ExecuteUpScript(new UpScript(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteUpScript(new UpMigration(0, string.Empty, () => string.Empty));
 
                 RunnerTemplate.History = new List<long> {1,2,3};
 

@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using Migrator.Scripts;
+using Migrator.Migrations;
 
 namespace Migrator.Runners
 {
     public interface IRunner : IDisposable
     {
         void Commit();
-        void ExecuteUpScript(UpScript script);
-        void ExecuteDownScript(DownScript script);
+        void ExecuteUpScript(UpMigration migration);
+        void ExecuteDownScript(DownMigration migration);
         IEnumerable<long> GetExecutedMigrations();
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using Migrator;
 using Migrator.Facades;
+using Migrator.Migrations;
 using Migrator.Runners;
-using Migrator.Scripts;
 using MigratorConsole.CommandLine;
 using MigratorConsole.Wrappers;
 
@@ -37,7 +37,7 @@ namespace MigratorConsole
             {
                 var fileSystemFacade = new FileSystemFacade();
 
-                var scriptFinder = new FileSystemScriptFinder(fileSystemFacade, scriptsPath);
+                var scriptFinder = new FileSystemMigrationFinder(fileSystemFacade, scriptsPath);
 
                 return new MigrationService(scriptFinder, runnerFactory);
             }

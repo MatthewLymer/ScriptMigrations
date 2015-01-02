@@ -1,16 +1,16 @@
 ﻿using System;
 
-namespace Migrator.Scripts
+namespace Migrator.Migrations
 {
-    public sealed class UpScript
+    public sealed class DownMigration
     {
         private readonly Func<string> _getContent;
 
-        public UpScript(long version, string name, Func<string> getContent)
+        public DownMigration(long version, string name, Func<string> getContent)
         {
-            _getContent = getContent;
             Version = version;
             Name = name;
+            _getContent = getContent;
         }
 
         public long Version { get; private set; }

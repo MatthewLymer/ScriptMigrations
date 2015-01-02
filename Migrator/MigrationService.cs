@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using Migrator.Exceptions;
+using Migrator.Migrations;
 using Migrator.Runners;
-using Migrator.Scripts;
 
 namespace Migrator
 {
     public sealed class MigrationService : IMigrationService
     {
-        private readonly IScriptFinder _scriptFinder;
+        private readonly IMigrationFinder _migrationFinder;
         private readonly IRunnerFactory _runnerFactory;
 
         public event EventHandler<ScriptStartedEventArgs> OnScriptStarted;
         public event EventHandler<EventArgs> OnScriptCompleted;
 
-        public MigrationService(IScriptFinder scriptFinder, IRunnerFactory runnerFactory)
+        public MigrationService(IMigrationFinder migrationFinder, IRunnerFactory runnerFactory)
         {
-            _scriptFinder = scriptFinder;
+            _migrationFinder = migrationFinder;
             _runnerFactory = runnerFactory;
         }
 
@@ -69,9 +69,9 @@ namespace Migrator
             }
         }
 
-        private List<UpScript> GetAndVerifyUpScripts()
+        private List<UpMigration> GetAndVerifyUpScripts()
         {
-            var upScripts = _scriptFinder.GetUpScripts().ToList();
+            var upScripts = _migrationFinder.GetUpScripts().ToList();
 
             if (upScripts.GroupBy(u => u.Version).Any(g => g.Count() > 1))
             {
@@ -81,9 +81,9 @@ namespace Migrator
             return upScripts;
         }
 
-        private IEnumerable<DownScript> GetAndVerifyDownScripts()
+        private IEnumerable<DownMigration> GetAndVerifyDownScripts()
         {
-            var downScripts = _scriptFinder.GetDownScripts().ToList();
+            var downScripts = _migrationFinder.GetDownScripts().ToList();
 
             if (downScripts.GroupBy(u => u.Version).Any(g => g.Count() > 1))
             {
@@ -93,7 +93,7 @@ namespace Migrator
             return downScripts;
         }
 
-        private static IEnumerable<UpScript> ExcludeExecutedUpScripts(IEnumerable<UpScript> upScripts, IEnumerable<long> executedMigrations)
+        private static IEnumerable<UpMigration> ExcludeExecutedUpScripts(IEnumerable<UpMigration> upScripts, IEnumerable<long> executedMigrations)
         {
             return upScripts.Where(x => !executedMigrations.Contains(x.Version));
         }
@@ -104,7 +104,7 @@ namespace Migrator
             
             foreach (var executedMigration in migrationsToRemove.OrderByDescending(x => x))
             {
-                DownScript migration;
+                DownMigration migration;
                 
                 if (!downScripts.TryGetValue(executedMigration, out migration))
                 {
