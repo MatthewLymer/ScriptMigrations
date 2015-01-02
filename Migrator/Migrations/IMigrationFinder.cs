@@ -4,7 +4,7 @@ namespace Migrator.Migrations
 {
     public interface IMigrationFinder
     {
-        IEnumerable<UpMigration> GetUpScripts();
-        IEnumerable<DownMigration> GetDownScripts();
+        IEnumerable<UpMigration> GetUpMigrations();
+        IEnumerable<DownMigration> GetDownMigrations();
     }
 }

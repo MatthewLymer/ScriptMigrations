@@ -70,6 +70,10 @@
       <Project>{f7741876-afff-468a-bfb5-b0fa5ac157d0}</Project>
       <Name>Migrator</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SystemWrappers\SystemWrappers.csproj">
+      <Project>{52E236FD-3472-448C-87E0-7F09F86273F5}</Project>
+      <Name>SystemWrappers</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\" />

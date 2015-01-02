@@ -1,8 +1,8 @@
 ﻿using System.IO;
 
-namespace Migrator.Facades
+namespace SystemWrappers.Interfaces.IO
 {
-    public interface IFileSystemFacade
+    public interface IFileSystem
     {
         string[] GetFiles(string path, string searchPattern, SearchOption searchOption);
         string ReadAllText(string path);

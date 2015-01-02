@@ -1,6 +1,6 @@
-﻿namespace MigratorConsole.Wrappers
+﻿namespace SystemWrappers.Interfaces
 {
-    public interface IConsoleWrapper
+    public interface IConsole
     {
         void WriteLine(string format, params object[] arg);
         void WriteErrorLine(string format, params object[] arg);

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Migrator.Facades;
+using SystemWrappers.Interfaces.IO;
 using Migrator.Migrations;
 using Moq;
 using NUnit.Framework;
@@ -14,15 +14,15 @@ namespace Migrator.Tests.Migrations
         {
             private const string Path = ".";
 
-            private Mock<IFileSystemFacade> _mockFileSystemFacade;
+            private Mock<IFileSystem> _mockFileSystem;
             private FileSystemMigrationFinder _migrationFinder;
 
             [SetUp]
             public void BeforeEachTest()
             {
-                _mockFileSystemFacade = new Mock<IFileSystemFacade>();
+                _mockFileSystem = new Mock<IFileSystem>();
 
-                _migrationFinder = new FileSystemMigrationFinder(_mockFileSystemFacade.Object, Path);
+                _migrationFinder = new FileSystemMigrationFinder(_mockFileSystem.Object, Path);
             }
 
             private class GivenTheDirectoryIsEmpty : GivenADirectory
@@ -30,36 +30,36 @@ namespace Migrator.Tests.Migrations
                 [SetUp]
                 public new void BeforeEachTest()
                 {
-                    _mockFileSystemFacade.Setup(
+                    _mockFileSystem.Setup(
                         x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                         .Returns(new string[0]);
                 }
 
                 [TestFixture]
-                public class WhenTellingTheFileSystemScriptFinderToFindUpScripts : GivenTheDirectoryIsEmpty
+                public class WhenTellingTheFileSystemMigrationFinderToFindUpMigrations : GivenTheDirectoryIsEmpty
                 {
                     [Test]
                     public void ShouldReturnAnEmptyEnumeration()
                     {
                         // act
-                        IEnumerable<UpMigration> upScripts = _migrationFinder.GetUpScripts();
+                        var migrations = _migrationFinder.GetUpMigrations();
 
                         // assert
-                        Assert.IsEmpty(upScripts);
+                        Assert.IsEmpty(migrations);
                     }
                 }
 
                 [TestFixture]
-                public class WhenTellingTheFileSystemScriptFinderToFindDownScripts : GivenTheDirectoryIsEmpty
+                public class WhenTellingTheFileSystemMigrationFinderToFindDownMigrations : GivenTheDirectoryIsEmpty
                 {
                     [Test]
                     public void ShouldReturnAnEmptyEnumeration()
                     {
                         // act
-                        var downScripts = _migrationFinder.GetDownScripts();
+                        var migrations = _migrationFinder.GetDownMigrations();
 
                         // assert
-                        Assert.IsEmpty(downScripts);
+                        Assert.IsEmpty(migrations);
                     }
                 }
             }
@@ -75,21 +75,21 @@ namespace Migrator.Tests.Migrations
                 {
                     string scriptPath = string.Format(@".\{0}_{1}_up.sql", Version, Name);
 
-                    _mockFileSystemFacade.Setup(
+                    _mockFileSystem.Setup(
                         x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                         .Returns(new[] {scriptPath});
 
-                    _mockFileSystemFacade.Setup(x => x.ReadAllText(scriptPath)).Returns(Content);
+                    _mockFileSystem.Setup(x => x.ReadAllText(scriptPath)).Returns(Content);
                 }
 
                 [TestFixture]
-                public class WhenTellingTheFileSystemScriptFinderToFindUpScripts : GivenADirectoryWithASingleUpScript
+                public class WhenTellingTheFileSystemMigrationFinderToFindUpMigrations : GivenADirectoryWithASingleUpScript
                 {
                     [Test]
                     public void ShouldReturnASinglePopulatedUpScript()
                     {
                         // act
-                        var scripts = _migrationFinder.GetUpScripts();
+                        var scripts = _migrationFinder.GetUpMigrations();
 
                         // assert
                         var script = scripts.Single();
@@ -102,11 +102,11 @@ namespace Migrator.Tests.Migrations
                     [Test]
                     public void ShouldNotAccessFilesystemIfContentPropertyIsNotRead()
                     {
-                        var scripts = _migrationFinder.GetUpScripts();
+                        var migrations = _migrationFinder.GetUpMigrations();
 
-                        Assert.IsNotEmpty(scripts);
+                        Assert.IsNotEmpty(migrations);
 
-                        _mockFileSystemFacade.Verify(x => x.ReadAllText(It.IsAny<string>()), Times.Never);
+                        _mockFileSystem.Verify(x => x.ReadAllText(It.IsAny<string>()), Times.Never);
                     }
                 }
             }
@@ -122,23 +122,23 @@ namespace Migrator.Tests.Migrations
                 [SetUp]
                 public new void BeforeEachTest()
                 {
-                    _mockFileSystemFacade.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
+                    _mockFileSystem.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
                     
-                    _mockFileSystemFacade.Setup(x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                    _mockFileSystem.Setup(x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                                          .Returns(_scriptPaths);
                 }
 
                 [TestFixture]
-                public class WhenTellingTheFileSystemScriptFinderToFindUpScripts : GivenADirectoryWithMultipleUpScripts
+                public class WhenTellingTheFileSystemMigrationFinderToFindUpMigrations : GivenADirectoryWithMultipleUpScripts
                 {
                     [Test]
-                    public void ShouldReturnMultipleUpScripts()
+                    public void ShouldReturnMultipleUpMigrations()
                     {
                         // act
-                        var scripts = _migrationFinder.GetUpScripts();
+                        var migrations = _migrationFinder.GetUpMigrations();
 
                         // assert
-                        Assert.AreEqual(3, scripts.Count());
+                        Assert.AreEqual(3, migrations.Count());
                     }
                 }
             }
@@ -154,38 +154,38 @@ namespace Migrator.Tests.Migrations
                 {
                     string filePath = string.Format(@".\{0}_{1}_down.sql", Version, Name);
 
-                    _mockFileSystemFacade.Setup(
+                    _mockFileSystem.Setup(
                         x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                         .Returns(new[] { filePath });
 
-                    _mockFileSystemFacade.Setup(x => x.ReadAllText(filePath)).Returns(Content);                    
+                    _mockFileSystem.Setup(x => x.ReadAllText(filePath)).Returns(Content);                    
                 }
 
                 [TestFixture]
-                public class WhenTellingTheFileSystemScriptFinderToFindDownScripts : GivenADirectoryWithASingleDownScript
+                public class WhenTellingTheFileSystemMigrationFinderToFindDownMigrations : GivenADirectoryWithASingleDownScript
                 {
                     [Test]
-                    public void ShouldReturnASinglePopulatedDownScript()
+                    public void ShouldReturnASinglePopulatedDownMigration()
                     {
                         // act
-                        var scripts = _migrationFinder.GetDownScripts();
+                        var migrations = _migrationFinder.GetDownMigrations();
 
                         // assert
-                        var script = scripts.Single();
+                        var migration = migrations.Single();
 
-                        Assert.AreEqual(Version, script.Version);
-                        Assert.AreEqual(Name, script.Name);
-                        Assert.AreEqual(Content, script.Content);                        
+                        Assert.AreEqual(Version, migration.Version);
+                        Assert.AreEqual(Name, migration.Name);
+                        Assert.AreEqual(Content, migration.Content);                        
                     }
 
                     [Test]
                     public void ShouldNotAccessFilesystemIfContentPropertyIsNotRead()
                     {
-                        var scripts = _migrationFinder.GetDownScripts();
+                        var migrations = _migrationFinder.GetDownMigrations();
 
-                        Assert.IsNotEmpty(scripts);
+                        Assert.IsNotEmpty(migrations);
 
-                        _mockFileSystemFacade.Verify(x => x.ReadAllText(It.IsAny<string>()), Times.Never);
+                        _mockFileSystem.Verify(x => x.ReadAllText(It.IsAny<string>()), Times.Never);
                     }
                 }
             }
@@ -201,23 +201,23 @@ namespace Migrator.Tests.Migrations
                 [SetUp]
                 public new void BeforeEachTest()
                 {
-                    _mockFileSystemFacade.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
+                    _mockFileSystem.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
 
-                    _mockFileSystemFacade.Setup(x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                    _mockFileSystem.Setup(x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                                          .Returns(_files);
                 }
 
                 [TestFixture]
-                public class WhenTellingTheFileSystemScriptFinderToFindDownScripts : GivenADirectoryWithMultipleDownScripts
+                public class WhenTellingTheFileSystemMigrationFinderToFindDownMigrations : GivenADirectoryWithMultipleDownScripts
                 {
                     [Test]
-                    public void ShouldReturnMultipleDownScripts()
+                    public void ShouldReturnMultipleDownMigrations()
                     {
                         // act
-                        var scripts = _migrationFinder.GetDownScripts();
+                        var migrations = _migrationFinder.GetDownMigrations();
 
                         // assert
-                        Assert.AreEqual(3, scripts.Count());
+                        Assert.AreEqual(3, migrations.Count());
                     }
                 }                
             }
@@ -235,33 +235,33 @@ namespace Migrator.Tests.Migrations
                 [SetUp]
                 public new void BeforeEachTest()
                 {
-                    _mockFileSystemFacade.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
+                    _mockFileSystem.Setup(x => x.ReadAllText(It.IsAny<string>())).Returns("");
 
-                    _mockFileSystemFacade.Setup(x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
+                    _mockFileSystem.Setup(x => x.GetFiles(Path, FileSystemMigrationFinder.SqlFileSearchPattern, SearchOption.AllDirectories))
                                          .Returns(_files);
                 }
 
                 [TestFixture]
-                public class WhenTellingTheFileSystemScriptFinderToFindScripts : GivenADirectoryWithManyDifferentFiles
+                public class WhenTellingTheFileSystemMigrationFinderToFindMigrations : GivenADirectoryWithManyDifferentFiles
                 {
                     [Test]
-                    public void ShouldOnlyReturnUpScripts()
+                    public void ShouldOnlyReturnUpMigrations()
                     {
                         // act
-                        var scripts = _migrationFinder.GetUpScripts();
+                        var migrations = _migrationFinder.GetUpMigrations();
 
                         // assert
-                        Assert.AreEqual(1, scripts.Count());
+                        Assert.AreEqual(1, migrations.Count());
                     }
 
                     [Test]
-                    public void ShouldOnlyReturnDownScripts()
+                    public void ShouldOnlyReturnDownMigrations()
                     {
                         // act
-                        var scripts = _migrationFinder.GetDownScripts();
+                        var migrations = _migrationFinder.GetDownMigrations();
 
                         // assert
-                        Assert.AreEqual(1, scripts.Count());
+                        Assert.AreEqual(1, migrations.Count());
                     }
                 }                  
             }

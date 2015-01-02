@@ -1,37 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using SystemWrappers.Interfaces;
 using Migrator;
 using Migrator.Runners;
 using MigratorConsole.Properties;
-using MigratorConsole.Wrappers;
 
 namespace MigratorConsole
 {
     public class MigratorCommands : IMigratorCommands
     {
-        private readonly IConsoleWrapper _consoleWrapper;
+        private readonly IConsole _console;
         private readonly IMigrationServiceFactory _migrationServiceFactory;
         private readonly IActivatorFacade _activatorFacade;
 
-        public MigratorCommands(IConsoleWrapper consoleWrapper, IMigrationServiceFactory migrationServiceFactory, IActivatorFacade activatorFacade)
+        public MigratorCommands(IConsole console, IMigrationServiceFactory migrationServiceFactory, IActivatorFacade activatorFacade)
         {
-            _consoleWrapper = consoleWrapper;
+            _console = console;
             _migrationServiceFactory = migrationServiceFactory;
             _activatorFacade = activatorFacade;
         }
 
         public void ShowHelp()
         {
-            _consoleWrapper.WriteLine(Resources.HelpUsage);
+            _console.WriteLine(Resources.HelpUsage);
         }
 
         public void ShowErrors(IEnumerable<string> errors)
         {
-            _consoleWrapper.WriteErrorLine(Resources.ErrorHeading);
+            _console.WriteErrorLine(Resources.ErrorHeading);
 
             foreach (var error in errors)
             {
-                _consoleWrapper.WriteErrorLine("> {0}", error);
+                _console.WriteErrorLine("> {0}", error);
             }
 
             Environment.ExitCode = 1;
@@ -68,20 +68,20 @@ namespace MigratorConsole
 
             var service = _migrationServiceFactory.Create(scriptsPath, result.Instance);
 
-            service.OnScriptStarted += OnScriptStarted;
-            service.OnScriptCompleted += OnScriptCompleted;
+            service.OnMigrationStarted += OnMigrationStarted;
+            service.OnMigrationCompleted += OnMigrationCompleted;
 
             action(service);
         }
 
-        private void OnScriptStarted(object sender, ScriptStartedEventArgs args)
+        private void OnMigrationStarted(object sender, MigrationStartedEventArgs args)
         {
-            _consoleWrapper.Write(Resources.StartingMigrationMessageFormat, args.Version, args.ScriptName);
+            _console.Write(Resources.StartingMigrationMessageFormat, args.Version, args.Name);
         }
 
-        private void OnScriptCompleted(object sender, EventArgs args)
+        private void OnMigrationCompleted(object sender, EventArgs args)
         {
-            _consoleWrapper.WriteLine(Resources.CompletedMigrationMessage);
+            _console.WriteLine(Resources.CompletedMigrationMessage);
         }
 
         private void WriteResultCodeErrorLine(ActivatorResultCode resultCode, string runnerQualifiedName)
@@ -89,11 +89,11 @@ namespace MigratorConsole
             switch (resultCode)
             {
                 case ActivatorResultCode.UnableToResolveType:
-                    _consoleWrapper.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, runnerQualifiedName);
+                    _console.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, runnerQualifiedName);
                     break;
 
                 case ActivatorResultCode.UnableToResolveAssembly:
-                    _consoleWrapper.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, runnerQualifiedName);
+                    _console.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, runnerQualifiedName);
                     break;
             }
         }

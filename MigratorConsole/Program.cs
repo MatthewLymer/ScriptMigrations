@@ -1,10 +1,9 @@
-﻿using System.IO;
+﻿using SystemWrappers.Wrappers;
+using SystemWrappers.Wrappers.IO;
 using Migrator;
-using Migrator.Facades;
 using Migrator.Migrations;
 using Migrator.Runners;
 using MigratorConsole.CommandLine;
-using MigratorConsole.Wrappers;
 
 namespace MigratorConsole
 {
@@ -35,24 +34,11 @@ namespace MigratorConsole
         {
             public IMigrationService Create(string scriptsPath, IRunnerFactory runnerFactory)
             {
-                var fileSystemFacade = new FileSystemFacade();
+                var fileSystem = new FileSystemWrapper();
 
-                var scriptFinder = new FileSystemMigrationFinder(fileSystemFacade, scriptsPath);
+                var scriptFinder = new FileSystemMigrationFinder(fileSystem, scriptsPath);
 
                 return new MigrationService(scriptFinder, runnerFactory);
-            }
-        }
-
-        private class FileSystemFacade : IFileSystemFacade
-        {
-            public string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
-            {
-                return Directory.GetFiles(path, searchPattern, searchOption);
-            }
-
-            public string ReadAllText(string path)
-            {
-                return File.ReadAllText(path);
             }
         }
     }

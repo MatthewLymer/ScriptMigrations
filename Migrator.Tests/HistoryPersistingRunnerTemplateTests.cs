@@ -41,7 +41,7 @@ namespace Migrator.Tests
         }
 
         [TestFixture]
-        public class WhenExecutingUpScripts : GivenAHistoryTableRunnerTemplateSpy
+        public class WhenExecutingUpMigrations : GivenAHistoryTableRunnerTemplateSpy
         {
             private const string InsertHistoryRecordMethodName = "InsertHistoryRecord";
 
@@ -56,7 +56,7 @@ namespace Migrator.Tests
             [Test]
             public void ShouldCreateHistoryTableIfTableDoesNotExist()
             {
-                RunnerTemplate.ExecuteUpScript(new UpMigration(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteUpMigration(new UpMigration(0, string.Empty, () => string.Empty));
 
                 AssertHistoryTableCreated(RunnerTemplate.Invocations);
             }
@@ -66,7 +66,7 @@ namespace Migrator.Tests
             {
                 RunnerTemplate.DoesHistoryTableExistDefault = true;
 
-                RunnerTemplate.ExecuteUpScript(new UpMigration(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteUpMigration(new UpMigration(0, string.Empty, () => string.Empty));
 
                 AssertHistoryTableNotCreated(RunnerTemplate.Invocations);
             }
@@ -76,7 +76,7 @@ namespace Migrator.Tests
             [TestCase("delete from bar")]
             public void ShouldExecuteScriptAfterHistoryTableHasBeenEnsured(string scriptContent)
             {
-                RunnerTemplate.ExecuteUpScript(new UpMigration(0, string.Empty, () => scriptContent));
+                RunnerTemplate.ExecuteUpMigration(new UpMigration(0, string.Empty, () => scriptContent));
 
                 var invocations = RunnerTemplate.Invocations.ToList();
 
@@ -92,7 +92,7 @@ namespace Migrator.Tests
             [TestCase(2, "your-script")]
             public void ShouldInsertHistoryRecordAfterScriptHasBeenExecuted(long version, string name)
             {
-                RunnerTemplate.ExecuteUpScript(new UpMigration(version, name, () => string.Empty));
+                RunnerTemplate.ExecuteUpMigration(new UpMigration(version, name, () => string.Empty));
 
                 var invocations = RunnerTemplate.Invocations.ToList();
 
@@ -111,10 +111,10 @@ namespace Migrator.Tests
             {
                 RunnerTemplate.DoesHistoryTableExistDefault = doesHistoryTableExistDefault;
 
-                var upScript = new UpMigration(0, string.Empty, () => string.Empty);
+                var migration = new UpMigration(0, string.Empty, () => string.Empty);
 
-                RunnerTemplate.ExecuteUpScript(upScript);
-                RunnerTemplate.ExecuteUpScript(upScript);
+                RunnerTemplate.ExecuteUpMigration(migration);
+                RunnerTemplate.ExecuteUpMigration(migration);
 
                 Assert.AreEqual(1, RunnerTemplate.Invocations.Count(x => x.MethodOrPropertyName == DoesHistoryTableExistMethodName));
                 Assert.AreEqual(doesHistoryTableExistDefault ? 0 : 1, RunnerTemplate.Invocations.Count(x => x.MethodOrPropertyName == CreateHistoryTableMethodName));
@@ -122,7 +122,7 @@ namespace Migrator.Tests
         }
 
         [TestFixture]
-        public class WhenExecutingDownScripts : GivenAHistoryTableRunnerTemplateSpy
+        public class WhenExecutingDownMigrations : GivenAHistoryTableRunnerTemplateSpy
         {
             private const string DeleteHistoryRecordMethodName = "DeleteHistoryRecord";
 
@@ -137,7 +137,7 @@ namespace Migrator.Tests
             [Test]
             public void ShouldCreateHistoryTableIfTableDoesNotExist()
             {
-                RunnerTemplate.ExecuteDownScript(new DownMigration(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteDownMigration(new DownMigration(0, string.Empty, () => string.Empty));
 
                 AssertHistoryTableCreated(RunnerTemplate.Invocations);
             }
@@ -147,7 +147,7 @@ namespace Migrator.Tests
             {
                 RunnerTemplate.DoesHistoryTableExistDefault = true;
 
-                RunnerTemplate.ExecuteDownScript(new DownMigration(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteDownMigration(new DownMigration(0, string.Empty, () => string.Empty));
 
                 AssertHistoryTableNotCreated(RunnerTemplate.Invocations);
             }
@@ -157,7 +157,7 @@ namespace Migrator.Tests
             [TestCase("delete from bar")]
             public void ShouldExecuteScriptAfterHistoryTableHasBeenEnsured(string scriptContent)
             {
-                RunnerTemplate.ExecuteDownScript(new DownMigration(0, string.Empty, () => scriptContent));
+                RunnerTemplate.ExecuteDownMigration(new DownMigration(0, string.Empty, () => scriptContent));
 
                 var invocations = RunnerTemplate.Invocations.ToList();
 
@@ -173,7 +173,7 @@ namespace Migrator.Tests
             [TestCase(2)]
             public void ShouldInsertHistoryRecordAfterScriptHasBeenExecuted(long version)
             {
-                RunnerTemplate.ExecuteDownScript(new DownMigration(version, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteDownMigration(new DownMigration(version, string.Empty, () => string.Empty));
 
                 var invocations = RunnerTemplate.Invocations.ToList();
 
@@ -191,10 +191,10 @@ namespace Migrator.Tests
             {
                 RunnerTemplate.DoesHistoryTableExistDefault = doesHistoryTableExistDefault;
 
-                var script = new DownMigration(0, string.Empty, () => string.Empty);
+                var migration = new DownMigration(0, string.Empty, () => string.Empty);
 
-                RunnerTemplate.ExecuteDownScript(script);
-                RunnerTemplate.ExecuteDownScript(script);
+                RunnerTemplate.ExecuteDownMigration(migration);
+                RunnerTemplate.ExecuteDownMigration(migration);
 
                 Assert.AreEqual(1, RunnerTemplate.Invocations.Count(x => x.MethodOrPropertyName == DoesHistoryTableExistMethodName));
                 Assert.AreEqual(doesHistoryTableExistDefault ? 0 : 1, RunnerTemplate.Invocations.Count(x => x.MethodOrPropertyName == CreateHistoryTableMethodName));
@@ -240,7 +240,7 @@ namespace Migrator.Tests
             [Test]
             public void ShouldFindHistoryIfUpMigrationExecuted()
             {
-                RunnerTemplate.ExecuteUpScript(new UpMigration(0, string.Empty, () => string.Empty));
+                RunnerTemplate.ExecuteUpMigration(new UpMigration(0, string.Empty, () => string.Empty));
 
                 RunnerTemplate.History = new List<long> {1,2,3};
 

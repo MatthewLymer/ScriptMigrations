@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</ProjectGuid>
+    <ProjectGuid>{52E236FD-3472-448C-87E0-7F09F86273F5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Migrator</RootNamespace>
-    <AssemblyName>Migrator</AssemblyName>
+    <RootNamespace>SystemWrappers</RootNamespace>
+    <AssemblyName>SystemWrappers</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -34,32 +34,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HistoryTableRunnerTemplate.cs" />
-    <Compile Include="IMigrationService.cs" />
-    <Compile Include="Migrations\DownMigration.cs" />
-    <Compile Include="Exceptions\DuplicateMigrationVersionException.cs" />
-    <Compile Include="Migrations\FileSystemMigrationFinder.cs" />
-    <Compile Include="Runners\IRunner.cs" />
-    <Compile Include="Runners\IRunnerFactory.cs" />
-    <Compile Include="Migrations\IMigrationFinder.cs" />
-    <Compile Include="Exceptions\MigrationFailedException.cs" />
-    <Compile Include="Exceptions\MigrationMissingException.cs" />
-    <Compile Include="MigrationService.cs" />
-    <Compile Include="Exceptions\VersionNeverExecutedException.cs" />
-    <Compile Include="Exceptions\MissingDownMigrationException.cs" />
+    <Compile Include="Interfaces\IO\IFileSystem.cs" />
+    <Compile Include="Wrappers\ConsoleWrapper.cs" />
+    <Compile Include="Interfaces\IConsole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Migrations\UpMigration.cs" />
-    <Compile Include="ScriptCompletedEventArgs.cs" />
-    <Compile Include="MigrationStartedEventArgs.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Facades\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SystemWrappers\SystemWrappers.csproj">
-      <Project>{52E236FD-3472-448C-87E0-7F09F86273F5}</Project>
-      <Name>SystemWrappers</Name>
-    </ProjectReference>
+    <Compile Include="Wrappers\IO\FileSystemWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

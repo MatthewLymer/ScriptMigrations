@@ -7,7 +7,7 @@ namespace Migrator
         void Up();
         void Down(long version);
 
-        event EventHandler<ScriptStartedEventArgs> OnScriptStarted;
-        event EventHandler<EventArgs> OnScriptCompleted;
+        event EventHandler<MigrationStartedEventArgs> OnMigrationStarted;
+        event EventHandler<EventArgs> OnMigrationCompleted;
     }
 }

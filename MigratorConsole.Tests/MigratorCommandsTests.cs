@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
+using SystemWrappers.Interfaces;
 using Migrator;
 using Migrator.Runners;
 using MigratorConsole.Properties;
-using MigratorConsole.Wrappers;
 using Moq;
 using NUnit.Framework;
 
@@ -23,7 +23,7 @@ namespace MigratorConsole.Tests
             private Mock<IActivatorFacade> _mockActivatorFacade;
             private Mock<IMigrationServiceFactory> _mockMigrationServiceFactory;
 
-            protected Mock<IConsoleWrapper> MockConsoleWrapper { get; private set; }
+            protected Mock<IConsole> MockConsole { get; private set; }
             protected MigratorCommands Commands { get; private set; }
 
             protected static string CreateQualifiedName(Type type)
@@ -34,14 +34,14 @@ namespace MigratorConsole.Tests
 
             protected void AssertAssemblyLoadFailure(string runnerQualifiedName)
             {
-                MockConsoleWrapper.Verify(x => x.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, runnerQualifiedName));
+                MockConsole.Verify(x => x.WriteErrorLine(Resources.CouldNotLoadRunnerAssemblyFormat, runnerQualifiedName));
 
                 Assert.AreEqual(FailureExitCode, Environment.ExitCode);
             }
 
             protected void AssertTypeLoadFailure(string runnerQualifiedName)
             {
-                MockConsoleWrapper.Verify(x => x.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, runnerQualifiedName));
+                MockConsole.Verify(x => x.WriteErrorLine(Resources.CouldNotCreateRunnerFactoryType, runnerQualifiedName));
 
                 Assert.AreEqual(FailureExitCode, Environment.ExitCode);
             }
@@ -77,11 +77,11 @@ namespace MigratorConsole.Tests
             [SetUp]
             public void BeforeEachTest()
             {
-                MockConsoleWrapper = new Mock<IConsoleWrapper>();
+                MockConsole = new Mock<IConsole>();
                 _mockMigrationServiceFactory = new Mock<IMigrationServiceFactory>();
                 _mockActivatorFacade = new Mock<IActivatorFacade>();
 
-                Commands = new MigratorCommands(MockConsoleWrapper.Object, _mockMigrationServiceFactory.Object, _mockActivatorFacade.Object);
+                Commands = new MigratorCommands(MockConsole.Object, _mockMigrationServiceFactory.Object, _mockActivatorFacade.Object);
             }
         }
 
@@ -93,7 +93,7 @@ namespace MigratorConsole.Tests
             {
                 Commands.ShowHelp();
 
-                MockConsoleWrapper.Verify(x => x.WriteLine(Resources.HelpUsage));
+                MockConsole.Verify(x => x.WriteLine(Resources.HelpUsage));
             }
         }
 
@@ -105,7 +105,7 @@ namespace MigratorConsole.Tests
             {
                 Commands.ShowErrors(Enumerable.Empty<string>());
 
-                MockConsoleWrapper.Verify(x => x.WriteErrorLine(Resources.ErrorHeading));
+                MockConsole.Verify(x => x.WriteErrorLine(Resources.ErrorHeading));
             }
 
             [Test]
@@ -122,7 +122,7 @@ namespace MigratorConsole.Tests
                 foreach (var error in errors)
                 {
                     var currentError = error;
-                    MockConsoleWrapper.Verify(x => x.WriteErrorLine("> {0}", currentError));
+                    MockConsole.Verify(x => x.WriteErrorLine("> {0}", currentError));
                 }
             }
 
@@ -187,26 +187,26 @@ namespace MigratorConsole.Tests
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
 
-                var eventArgs = new ScriptStartedEventArgs(version, scriptName);
-                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnScriptStarted += null, eventArgs));
+                var eventArgs = new MigrationStartedEventArgs(version, scriptName);
+                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
 
                 Commands.MigrateUp(RunnerQualifiedName, ConnectionString, ScriptsPath);
 
-                MockConsoleWrapper.Verify(x => x.Write(Resources.StartingMigrationMessageFormat, version, scriptName));
+                MockConsole.Verify(x => x.Write(Resources.StartingMigrationMessageFormat, version, scriptName));
             }
 
             [Test]
-            public void ShouldWriteWhenScriptCompletes()
+            public void ShouldWriteWhenMigrationCompletes()
             {
                 var mockMigrationService = new Mock<IMigrationService>();
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
 
-                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnScriptCompleted += null, EventArgs.Empty));
+                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnMigrationCompleted += null, EventArgs.Empty));
 
                 Commands.MigrateUp(RunnerQualifiedName, ConnectionString, ScriptsPath);
 
-                MockConsoleWrapper.Verify(x => x.WriteLine(Resources.CompletedMigrationMessage));                
+                MockConsole.Verify(x => x.WriteLine(Resources.CompletedMigrationMessage));                
             }
         }
 
@@ -263,13 +263,13 @@ namespace MigratorConsole.Tests
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
 
-                var eventArgs = new ScriptStartedEventArgs(version, scriptName);
+                var eventArgs = new MigrationStartedEventArgs(version, scriptName);
 
-                mockMigrationService.Setup(x => x.Down(version)).Callback(() => mockMigrationService.Raise(x => x.OnScriptStarted += null, eventArgs));
+                mockMigrationService.Setup(x => x.Down(version)).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
 
                 Commands.MigrateDown(RunnerQualifiedName, ConnectionString, ScriptsPath, version);
 
-                MockConsoleWrapper.Verify(x => x.Write(Resources.StartingMigrationMessageFormat, version, scriptName));                
+                MockConsole.Verify(x => x.Write(Resources.StartingMigrationMessageFormat, version, scriptName));                
             }
 
             [Test]
@@ -279,11 +279,11 @@ namespace MigratorConsole.Tests
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
 
-                mockMigrationService.Setup(x => x.Down(0)).Callback(() => mockMigrationService.Raise(x => x.OnScriptCompleted += null, EventArgs.Empty));
+                mockMigrationService.Setup(x => x.Down(0)).Callback(() => mockMigrationService.Raise(x => x.OnMigrationCompleted += null, EventArgs.Empty));
 
                 Commands.MigrateDown(RunnerQualifiedName, ConnectionString, ScriptsPath, 0);
 
-                MockConsoleWrapper.Verify(x => x.WriteLine(Resources.CompletedMigrationMessage));
+                MockConsole.Verify(x => x.WriteLine(Resources.CompletedMigrationMessage));
             }
         }
     }

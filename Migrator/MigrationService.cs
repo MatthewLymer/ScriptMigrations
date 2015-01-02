@@ -12,8 +12,8 @@ namespace Migrator
         private readonly IMigrationFinder _migrationFinder;
         private readonly IRunnerFactory _runnerFactory;
 
-        public event EventHandler<ScriptStartedEventArgs> OnScriptStarted;
-        public event EventHandler<EventArgs> OnScriptCompleted;
+        public event EventHandler<MigrationStartedEventArgs> OnMigrationStarted;
+        public event EventHandler<EventArgs> OnMigrationCompleted;
 
         public MigrationService(IMigrationFinder migrationFinder, IRunnerFactory runnerFactory)
         {
@@ -23,9 +23,9 @@ namespace Migrator
 
         public void Up()
         {
-            var upScripts = GetAndVerifyUpScripts();
+            var upMigrations = GetAndVerifyUpMigrations();
             
-            if (!upScripts.Any())
+            if (!upMigrations.Any())
             {
                 return;
             }
@@ -34,13 +34,13 @@ namespace Migrator
             {
                 var executedMigrations = runner.GetExecutedMigrations();
 
-                foreach (var migration in ExcludeExecutedUpScripts(upScripts, executedMigrations).OrderBy(x => x.Version))
+                foreach (var migration in ExcludeExecutedUpMigrations(upMigrations, executedMigrations).OrderBy(x => x.Version))
                 {
-                    RaiseEvent(OnScriptStarted, this, new ScriptStartedEventArgs(migration.Version, migration.Name));
+                    RaiseEvent(OnMigrationStarted, this, new MigrationStartedEventArgs(migration.Version, migration.Name));
 
-                    runner.ExecuteUpScript(migration);
+                    runner.ExecuteUpMigration(migration);
 
-                    RaiseEvent(OnScriptCompleted, this, EventArgs.Empty);
+                    RaiseEvent(OnMigrationCompleted, this, EventArgs.Empty);
                 }
 
                 runner.Commit();
@@ -69,53 +69,53 @@ namespace Migrator
             }
         }
 
-        private List<UpMigration> GetAndVerifyUpScripts()
+        private List<UpMigration> GetAndVerifyUpMigrations()
         {
-            var upScripts = _migrationFinder.GetUpScripts().ToList();
+            var migrations = _migrationFinder.GetUpMigrations().ToList();
 
-            if (upScripts.GroupBy(u => u.Version).Any(g => g.Count() > 1))
+            if (migrations.GroupBy(u => u.Version).Any(g => g.Count() > 1))
             {
                 throw new DuplicateMigrationVersionException();
             }
 
-            return upScripts;
+            return migrations;
         }
 
-        private IEnumerable<DownMigration> GetAndVerifyDownScripts()
+        private IEnumerable<DownMigration> GetAndVerifyDownMigrations()
         {
-            var downScripts = _migrationFinder.GetDownScripts().ToList();
+            var migrations = _migrationFinder.GetDownMigrations().ToList();
 
-            if (downScripts.GroupBy(u => u.Version).Any(g => g.Count() > 1))
+            if (migrations.GroupBy(u => u.Version).Any(g => g.Count() > 1))
             {
                 throw new DuplicateMigrationVersionException();
             }
 
-            return downScripts;
+            return migrations;
         }
 
-        private static IEnumerable<UpMigration> ExcludeExecutedUpScripts(IEnumerable<UpMigration> upScripts, IEnumerable<long> executedMigrations)
+        private static IEnumerable<UpMigration> ExcludeExecutedUpMigrations(IEnumerable<UpMigration> migrations, IEnumerable<long> executedMigrations)
         {
-            return upScripts.Where(x => !executedMigrations.Contains(x.Version));
+            return migrations.Where(x => !executedMigrations.Contains(x.Version));
         }
 
         private void RemoveMigrations(IRunner runner, IEnumerable<long> migrationsToRemove)
         {
-            var downScripts = GetAndVerifyDownScripts().ToDictionary(x => x.Version);
+            var migrations = GetAndVerifyDownMigrations().ToDictionary(x => x.Version);
             
             foreach (var executedMigration in migrationsToRemove.OrderByDescending(x => x))
             {
                 DownMigration migration;
                 
-                if (!downScripts.TryGetValue(executedMigration, out migration))
+                if (!migrations.TryGetValue(executedMigration, out migration))
                 {
-                    throw new MigrationScriptMissingException();
+                    throw new MigrationMissingException();
                 }
 
-                RaiseEvent(OnScriptStarted, this, new ScriptStartedEventArgs(migration.Version, migration.Name));
+                RaiseEvent(OnMigrationStarted, this, new MigrationStartedEventArgs(migration.Version, migration.Name));
 
-                runner.ExecuteDownScript(migration);
+                runner.ExecuteDownMigration(migration);
 
-                RaiseEvent(OnScriptCompleted, this, EventArgs.Empty);
+                RaiseEvent(OnMigrationCompleted, this, EventArgs.Empty);
             }
         }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
-using Migrator.Facades;
+using SystemWrappers.Interfaces.IO;
 
 namespace Migrator.Migrations
 {
@@ -14,28 +14,28 @@ namespace Migrator.Migrations
         private static readonly Regex UpScriptRegex = new Regex(@"^\d{14}_(.+)_up$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex DownScriptRegex = new Regex(@"^\d{14}_(.+)_down$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private readonly IFileSystemFacade _fileSystemFacade;
+        private readonly IFileSystem _fileSystem;
         private readonly string _path;
 
-        public FileSystemMigrationFinder(IFileSystemFacade fileSystemFacade, string path)
+        public FileSystemMigrationFinder(IFileSystem fileSystem, string path)
         {
-            _fileSystemFacade = fileSystemFacade;
+            _fileSystem = fileSystem;
             _path = path;
         }
 
-        public IEnumerable<UpMigration> GetUpScripts()
+        public IEnumerable<UpMigration> GetUpMigrations()
         {
-            return GetScripts(UpScriptRegex, CreateUpScript);
+            return GetMigrations(UpScriptRegex, CreateUpMigration);
         }
 
-        public IEnumerable<DownMigration> GetDownScripts()
+        public IEnumerable<DownMigration> GetDownMigrations()
         {
-            return GetScripts(DownScriptRegex, CreateDownScript);
+            return GetMigrations(DownScriptRegex, CreateDownMigration);
         }
 
-        private IEnumerable<TMigration> GetScripts<TMigration>(Regex regex, Func<IList<string>, string, TMigration> createScript)
+        private IEnumerable<TMigration> GetMigrations<TMigration>(Regex regex, Func<IList<string>, string, TMigration> createScript)
         {
-            var files = _fileSystemFacade.GetFiles(_path, SqlFileSearchPattern, SearchOption.AllDirectories);
+            var files = _fileSystem.GetFiles(_path, SqlFileSearchPattern, SearchOption.AllDirectories);
 
             var scripts = new List<TMigration>();
 
@@ -58,14 +58,14 @@ namespace Migrator.Migrations
             return scripts;
         }
 
-        private UpMigration CreateUpScript(IList<string> fileSegments, string file)
+        private UpMigration CreateUpMigration(IList<string> fileSegments, string file)
         {
-            return new UpMigration(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystemFacade.ReadAllText(file));
+            return new UpMigration(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystem.ReadAllText(file));
         }
 
-        private DownMigration CreateDownScript(IList<string> fileSegments, string file)
+        private DownMigration CreateDownMigration(IList<string> fileSegments, string file)
         {
-            return new DownMigration(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystemFacade.ReadAllText(file));
+            return new DownMigration(long.Parse(fileSegments[0]), fileSegments[1], () => _fileSystem.ReadAllText(file));
         }
     }
 }

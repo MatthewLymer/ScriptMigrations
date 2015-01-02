@@ -63,8 +63,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Wrappers\ConsoleWrapper.cs" />
-    <Compile Include="Wrappers\IConsoleWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -80,6 +78,10 @@
     <ProjectReference Include="..\Migrator\Migrator.csproj">
       <Project>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</Project>
       <Name>Migrator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SystemWrappers\SystemWrappers.csproj">
+      <Project>{52E236FD-3472-448C-87E0-7F09F86273F5}</Project>
+      <Name>SystemWrappers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

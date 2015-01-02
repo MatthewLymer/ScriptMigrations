@@ -7,10 +7,10 @@ namespace SqlServerMigrator
     internal sealed class Runner : HistoryTableRunnerTemplate
     {
         private const string HistoryTableName = "_MigrationHistory";
-        private const string InsertHistoryRecordFormat = "INSERT INTO [dbo].[{0}](Version, ScriptName) VALUES(@version, @scriptName)";
+        private const string InsertHistoryRecordFormat = "INSERT INTO [dbo].[{0}](Version, Name) VALUES(@version, @name)";
         private const string DeleteHistoryRecordFormat = "DELETE FROM [dbo].[{0}] WHERE Version=@version";
         private const string GetHistoryFormat = "SELECT Version FROM [dbo].[{0}]";
-        private const string CreateTableHistoryFormat = @"CREATE TABLE [dbo].[{0}]([Version] BIGINT NOT NULL PRIMARY KEY, [ScriptName] NVARCHAR(255) NOT NULL)";
+        private const string CreateTableHistoryFormat = @"CREATE TABLE [dbo].[{0}]([Version] BIGINT NOT NULL PRIMARY KEY, [Name] NVARCHAR(255) NOT NULL)";
         private const string IsHistoryTableInSchemaFormat = "SELECT COUNT(*) FROM [sys].[tables] WHERE Name = @tableName";
 
         private static readonly SqlBatchSplitter BatchSplitter = new SqlBatchSplitter();
@@ -57,7 +57,7 @@ namespace SqlServerMigrator
                 command.CommandText = string.Format(InsertHistoryRecordFormat, HistoryTableName);
 
                 command.Parameters.AddWithValue("@version", version);
-                command.Parameters.AddWithValue("@scriptName", name);
+                command.Parameters.AddWithValue("@name", name);
 
                 command.ExecuteNonQuery();
             }

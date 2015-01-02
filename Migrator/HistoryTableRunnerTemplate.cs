@@ -16,7 +16,7 @@ namespace Migrator
             _lazyDoesHistoryTableExist = new Lazy<bool>(IsHistoryTableInSchema);
         }
 
-        public void ExecuteUpScript(UpMigration migration)
+        public void ExecuteUpMigration(UpMigration migration)
         {
             CreateHistoryTableIfNonExistant();
 
@@ -25,7 +25,7 @@ namespace Migrator
             InsertHistoryRecord(migration.Version, migration.Name);
         }
 
-        public void ExecuteDownScript(DownMigration migration)
+        public void ExecuteDownMigration(DownMigration migration)
         {
             CreateHistoryTableIfNonExistant();
 

@@ -81,6 +81,10 @@
       <Project>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</Project>
       <Name>Migrator</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SystemWrappers\SystemWrappers.csproj">
+      <Project>{52E236FD-3472-448C-87E0-7F09F86273F5}</Project>
+      <Name>SystemWrappers</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

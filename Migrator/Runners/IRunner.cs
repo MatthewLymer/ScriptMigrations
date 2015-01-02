@@ -7,8 +7,8 @@ namespace Migrator.Runners
     public interface IRunner : IDisposable
     {
         void Commit();
-        void ExecuteUpScript(UpMigration migration);
-        void ExecuteDownScript(DownMigration migration);
+        void ExecuteUpMigration(UpMigration migration);
+        void ExecuteDownMigration(DownMigration migration);
         IEnumerable<long> GetExecutedMigrations();
     }
 }

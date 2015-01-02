@@ -1,8 +1,9 @@
 ﻿using System;
+using SystemWrappers.Interfaces;
 
-namespace MigratorConsole.Wrappers
+namespace SystemWrappers.Wrappers
 {
-    class ConsoleWrapper : IConsoleWrapper
+    public sealed class ConsoleWrapper : IConsole
     {
         public void WriteLine(string format, params object[] arg)
         {

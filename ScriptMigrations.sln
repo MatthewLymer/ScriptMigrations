@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigratorConsole", "Migrator
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigratorConsole.Tests", "MigratorConsole.Tests\MigratorConsole.Tests.csproj", "{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemWrappers", "SystemWrappers\SystemWrappers.csproj", "{52E236FD-3472-448C-87E0-7F09F86273F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52E236FD-3472-448C-87E0-7F09F86273F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52E236FD-3472-448C-87E0-7F09F86273F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52E236FD-3472-448C-87E0-7F09F86273F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52E236FD-3472-448C-87E0-7F09F86273F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
