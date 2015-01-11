@@ -61,7 +61,7 @@ namespace MigratorConsole.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Completed!.
+        ///   Looks up a localized string similar to Done! ({0} s).
         /// </summary>
         public static string CompletedMigrationMessage {
             get {
@@ -160,7 +160,7 @@ namespace MigratorConsole.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Starting migration {0}, &apos;{1}&apos;....
+        ///   Looks up a localized string similar to Starting migration {0}, &apos;{1}&apos;... .
         /// </summary>
         public static string StartingMigrationMessageFormat {
             get {

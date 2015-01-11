@@ -129,33 +129,22 @@ namespace Migrator.Tests
                     [Test]
                     public void ShouldDisposeOfRunner()
                     {
-                        // act
                         _migrationService.Up();
 
-                        // assert
                         _mockRunner.Verify(x => x.Dispose(), Times.Once);
                     }
 
                     [Test]
                     public void ShouldNotCommitIfThereWasAnExceptionWhenExecutingMigration()
                     {
-                        // arrange
                         var migrationService = new MigrationService(_mockMigrationFinder.Object, _mockRunnerFactory.Object);
 
                         _mockRunner.Setup(x => x.ExecuteUpMigration(It.IsAny<UpMigration>()))
                             .Throws<MigrationFailedException>();
 
-                        // act
-                        try
-                        {
-                            migrationService.Up();
-                            Assert.Fail();
-                        }
-                        catch (MigrationFailedException)
-                        {
-                            // assert
-                            _mockRunner.Verify(x => x.Commit(), Times.Never);
-                        }
+                        Assert.Throws<MigrationFailedException>(migrationService.Up);
+
+                        _mockRunner.Verify(x => x.Commit(), Times.Never);
                     }
                 }
             }
@@ -193,22 +182,11 @@ namespace Migrator.Tests
                     [Test]
                     public void ShouldThrowExceptionIfMultipleMigrationMigrationsHaveTheSameVersion()
                     {
-                        // arrange
                         var duplicatedUpMigration = new UpMigration(666, "", () => "");
                         _upMigrations.Add(duplicatedUpMigration);
                         _upMigrations.Add(duplicatedUpMigration);
 
-                        try
-                        {
-                            // act
-                            _migrationService.Up();
-                            Assert.Fail();
-                        }
-                        catch (DuplicateMigrationVersionException)
-                        {
-                            // assert
-                            Assert.Pass();
-                        }
+                        Assert.Throws<DuplicateMigrationVersionException>(_migrationService.Up);
                     }
 
                     [Test]
@@ -333,49 +311,29 @@ namespace Migrator.Tests
                     [Test]
                     public void ShouldThrowExceptionIfVersionIsOutOfRange()
                     {
-                        try
-                        {
-                            // act
-                            _migrationService.Down(-1);
-                            Assert.Fail();
-                        }
-                        catch (ArgumentOutOfRangeException e)
-                        {
-                            // assert
-                            Assert.AreEqual("version", e.ParamName);
-                        }
+                        var e = Assert.Throws<ArgumentOutOfRangeException>(() => _migrationService.Down(-1));
+
+                        Assert.AreEqual("version", e.ParamName);
                     }
                     
                     [Test]
                     public void ShouldNotCommitIfThereWasAnExceptionWhenExecutingMigration()
                     {
-                        // arrange
                         _mockRunner.Setup(x => x.ExecuteDownMigration(It.IsAny<DownMigration>()))
                             .Throws<MigrationFailedException>();
 
-                        // act
-                        try
-                        {
-                            _migrationService.Down(0);
-                            Assert.Fail();
-                        }
-                        catch (MigrationFailedException)
-                        {
-                            // assert
-                            _mockRunner.Verify(x => x.Commit(), Times.Never);
-                        }
+                        Assert.Throws<MigrationFailedException>(() => _migrationService.Down(0));
+
+                        _mockRunner.Verify(x => x.Commit(), Times.Never);
                     }
 
                     [Test]
                     public void ShouldExecuteAllDownMigrationsInDescendingOrder()
                     {
-                        // arrange
                         EnsureDownMigrationsExecutedInDescendingOrder();
 
-                        // act
                         _migrationService.Down(0);
 
-                        // assert
                         _mockRunner.Verify(x => x.ExecuteDownMigration(It.IsAny<DownMigration>()), Times.Exactly(3));
                         _mockRunner.Verify(x => x.Commit(), Times.Once);
                     }
@@ -435,17 +393,7 @@ namespace Migrator.Tests
                     [Test]
                     public void ShouldThrowExceptionIfVersionRequestedDoesNotExist()
                     {
-                        try
-                        {
-                            // act
-                            _migrationService.Down(15);
-                            Assert.Fail();
-                        }
-                        catch (VersionNeverExecutedException)
-                        {
-                            // assert
-                            Assert.Pass();
-                        }
+                        Assert.Throws<VersionNeverExecutedException>(() => _migrationService.Down(15));
                     }
 
                     [Test]
@@ -499,38 +447,18 @@ namespace Migrator.Tests
                     [Test]
                     public void ShouldThrowAnException()
                     {
-                        try
-                        {
-                            // act
-                            _migrationService.Down(0);
-                            Assert.Fail();
-                        }
-                        catch (MigrationMissingException)
-                        {
-                            // assert
-                            Assert.Pass();
-                        }
+                        Assert.Throws<MigrationMissingException>(() => _migrationService.Down(0));
                     }
 
                     [Test]
                     public void ShouldThrowExceptionIfMultipleMigrationMigrationsHaveTheSameVersion()
                     {
-                        // arrange
                         var duplicatedDownMigration = new DownMigration(666, "", () => "");
+
                         _downMigrations.Add(duplicatedDownMigration);
                         _downMigrations.Add(duplicatedDownMigration);
 
-                        try
-                        {
-                            // act
-                            _migrationService.Down(0);
-                            Assert.Fail();
-                        }
-                        catch (DuplicateMigrationVersionException)
-                        {
-                            // assert
-                            Assert.Pass();
-                        }
+                        Assert.Throws<DuplicateMigrationVersionException>(() => _migrationService.Down(0));
                     }
                 }
 
@@ -540,17 +468,7 @@ namespace Migrator.Tests
                     [Test]
                     public void ShouldThrowAnException()
                     {
-                        try
-                        {
-                            // act
-                            _migrationService.Down(10);
-                            Assert.Fail();
-                        }
-                        catch (MigrationMissingException)
-                        {
-                            // assert
-                            Assert.Pass();
-                        }
+                        Assert.Throws<MigrationMissingException>(() => _migrationService.Down(10));
                     }
                 }
             }

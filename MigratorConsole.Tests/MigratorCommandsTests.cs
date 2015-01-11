@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
 using SystemWrappers.Interfaces;
+using SystemWrappers.Interfaces.Diagnostics;
 using Migrator;
 using Migrator.Runners;
+using MigratorConsole.Assembly;
 using MigratorConsole.Properties;
 using Moq;
 using NUnit.Framework;
@@ -21,9 +23,13 @@ namespace MigratorConsole.Tests
             protected const string ScriptsPath = ".";
 
             private Mock<IActivatorFacade> _mockActivatorFacade;
+
             private Mock<IMigrationServiceFactory> _mockMigrationServiceFactory;
 
             protected Mock<IConsole> MockConsole { get; private set; }
+
+            protected Mock<IStopwatch> MockStopwatch { get; private set; }
+
             protected MigratorCommands Commands { get; private set; }
 
             protected static string CreateQualifiedName(Type type)
@@ -77,11 +83,12 @@ namespace MigratorConsole.Tests
             [SetUp]
             public void BeforeEachTest()
             {
+                MockStopwatch = new Mock<IStopwatch>();
                 MockConsole = new Mock<IConsole>();
                 _mockMigrationServiceFactory = new Mock<IMigrationServiceFactory>();
                 _mockActivatorFacade = new Mock<IActivatorFacade>();
 
-                Commands = new MigratorCommands(MockConsole.Object, _mockMigrationServiceFactory.Object, _mockActivatorFacade.Object);
+                Commands = new MigratorCommands(MockConsole.Object, _mockMigrationServiceFactory.Object, _mockActivatorFacade.Object, MockStopwatch.Object);
             }
         }
 
@@ -179,10 +186,12 @@ namespace MigratorConsole.Tests
             }
 
             [Test]
-            [TestCase(1, "my-script")]
-            [TestCase(2, "your-script")]
+            [TestCase(20140102030405, "my-script")]
+            [TestCase(20150203040506, "your-script")]
             public void ShouldWriteWhenScriptStarts(long version, string scriptName)
             {
+                var expectedMessage = MessageFormatter.FormatMigrationStartedMessage(version, scriptName);
+
                 var mockMigrationService = new Mock<IMigrationService>();
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
@@ -191,13 +200,36 @@ namespace MigratorConsole.Tests
                 mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
 
                 Commands.MigrateUp(RunnerQualifiedName, ConnectionString, ScriptsPath);
-
-                MockConsole.Verify(x => x.Write(Resources.StartingMigrationMessageFormat, version, scriptName));
+                
+                MockConsole.Verify(c => c.Write(expectedMessage));
             }
 
             [Test]
-            public void ShouldWriteWhenMigrationCompletes()
+            public void ShouldResetStopwatchWhenScriptStarts()
             {
+                var mockMigrationService = new Mock<IMigrationService>();
+
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+
+                var eventArgs = new MigrationStartedEventArgs(0, "not-relevant");
+                mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
+
+                Commands.MigrateUp(RunnerQualifiedName, ConnectionString, ScriptsPath);
+
+                MockStopwatch.Verify(s => s.Restart());
+            }
+
+            [Test]
+            [TestCase(5)]
+            [TestCase(10)]
+            public void ShouldWriteWhenMigrationCompletes(double elapsedSeconds)
+            {
+                var timeSpan = TimeSpan.FromSeconds(elapsedSeconds);
+
+                MockStopwatch.Setup(x => x.Elapsed).Returns(timeSpan);
+
+                var expectedMessage = MessageFormatter.FormatMigrationCompletedMessage(timeSpan);
+
                 var mockMigrationService = new Mock<IMigrationService>();
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
@@ -206,7 +238,7 @@ namespace MigratorConsole.Tests
 
                 Commands.MigrateUp(RunnerQualifiedName, ConnectionString, ScriptsPath);
 
-                MockConsole.Verify(x => x.WriteLine(Resources.CompletedMigrationMessage));                
+                MockConsole.Verify(x => x.WriteLine(expectedMessage));                
             }
         }
 
@@ -259,22 +291,46 @@ namespace MigratorConsole.Tests
             [TestCase(2, "your-script")]
             public void ShouldWriteWhenScriptStarts(long version, string scriptName)
             {
+                var expectedMessage = MessageFormatter.FormatMigrationStartedMessage(version, scriptName);
+
                 var mockMigrationService = new Mock<IMigrationService>();
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
 
                 var eventArgs = new MigrationStartedEventArgs(version, scriptName);
+                mockMigrationService.Setup(x => x.Down(0)).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
 
-                mockMigrationService.Setup(x => x.Down(version)).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
+                Commands.MigrateDown(RunnerQualifiedName, ConnectionString, ScriptsPath, 0);
 
-                Commands.MigrateDown(RunnerQualifiedName, ConnectionString, ScriptsPath, version);
-
-                MockConsole.Verify(x => x.Write(Resources.StartingMigrationMessageFormat, version, scriptName));                
+                MockConsole.Verify(c => c.Write(expectedMessage));
             }
 
             [Test]
-            public void ShouldWriteWhenScriptCompletes()
+            public void ShouldResetStopwatchWhenScriptStarts()
             {
+                var mockMigrationService = new Mock<IMigrationService>();
+
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+
+                var eventArgs = new MigrationStartedEventArgs(0, "not-relevant");
+                mockMigrationService.Setup(x => x.Down(0)).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
+
+                Commands.MigrateDown(RunnerQualifiedName, ConnectionString, ScriptsPath, 0);
+
+                MockStopwatch.Verify(s => s.Restart());
+            }
+
+            [Test]
+            [TestCase(5)]
+            [TestCase(10)]
+            public void ShouldWriteWhenScriptCompletes(double elapsedSeconds)
+            {
+                var timeSpan = TimeSpan.FromSeconds(elapsedSeconds);
+
+                MockStopwatch.Setup(x => x.Elapsed).Returns(timeSpan);
+
+                var expectedMessage = MessageFormatter.FormatMigrationCompletedMessage(timeSpan);
+
                 var mockMigrationService = new Mock<IMigrationService>();
 
                 SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
@@ -283,7 +339,7 @@ namespace MigratorConsole.Tests
 
                 Commands.MigrateDown(RunnerQualifiedName, ConnectionString, ScriptsPath, 0);
 
-                MockConsole.Verify(x => x.WriteLine(Resources.CompletedMigrationMessage));
+                MockConsole.Verify(x => x.WriteLine(expectedMessage));
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace MigratorConsole
+﻿namespace MigratorConsole.Assembly
 {
     public interface IActivatorFacade
     {

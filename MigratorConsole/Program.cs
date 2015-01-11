@@ -1,8 +1,11 @@
-﻿using SystemWrappers.Wrappers;
+﻿using System.Diagnostics;
+using SystemWrappers.Wrappers;
+using SystemWrappers.Wrappers.Diagnostics;
 using SystemWrappers.Wrappers.IO;
 using Migrator;
 using Migrator.Migrations;
 using Migrator.Runners;
+using MigratorConsole.Assembly;
 using MigratorConsole.CommandLine;
 
 namespace MigratorConsole
@@ -17,7 +20,9 @@ namespace MigratorConsole
 
             var activatorFacade = new ActivatorFacade();
 
-            var migratorCommands = new MigratorCommands(consoleWrapper, migrationServiceFactory, activatorFacade);
+            var stopwatch = new StopwatchWrapper(new Stopwatch());
+
+            var migratorCommands = new MigratorCommands(consoleWrapper, migrationServiceFactory, activatorFacade, stopwatch);
 
             var migratorCommandLineParser = new MigratorCommandLineParser<MigratorCommandLineParserModel>();
 

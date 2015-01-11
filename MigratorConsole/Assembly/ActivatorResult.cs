@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MigratorConsole
+namespace MigratorConsole.Assembly
 {
     public enum ActivatorResultCode
     {

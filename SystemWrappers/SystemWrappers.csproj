@@ -34,10 +34,12 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\Diagnostics\IStopwatch.cs" />
     <Compile Include="Interfaces\IO\IFileSystem.cs" />
     <Compile Include="Wrappers\ConsoleWrapper.cs" />
     <Compile Include="Interfaces\IConsole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Wrappers\Diagnostics\StopwatchWrapper.cs" />
     <Compile Include="Wrappers\IO\FileSystemWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

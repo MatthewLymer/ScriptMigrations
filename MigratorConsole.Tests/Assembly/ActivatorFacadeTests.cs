@@ -1,7 +1,8 @@
 ﻿using System;
+using MigratorConsole.Assembly;
 using NUnit.Framework;
 
-namespace MigratorConsole.Tests
+namespace MigratorConsole.Tests.Assembly
 {
     class ActivatorFacadeTests
     {

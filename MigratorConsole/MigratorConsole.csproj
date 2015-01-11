@@ -41,20 +41,21 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActivatorFacade.cs" />
-    <Compile Include="ActivatorResult.cs" />
+    <Compile Include="Assembly\ActivatorFacade.cs" />
+    <Compile Include="Assembly\ActivatorResult.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="CommandLine\CommandLineBinder.cs" />
     <Compile Include="CommandLine\CommandLineBinderResult.cs" />
     <Compile Include="CommandLine\ICommandLineBinder.cs" />
     <Compile Include="CommandLine\ICommandLineParser.cs" />
     <Compile Include="CommandLine\MigratorCommandLineParserModelValidator.cs" />
-    <Compile Include="IActivatorFacade.cs" />
+    <Compile Include="Assembly\IActivatorFacade.cs" />
     <Compile Include="IMigrationServiceFactory.cs" />
     <Compile Include="IMigratorCommands.cs" />
     <Compile Include="CommandLine\MigratorCommandLineParser.cs" />
     <Compile Include="CommandLine\MigratorCommandLineParserModel.cs" />
     <Compile Include="CommandLine\CommandLineAliasAttribute.cs" />
+    <Compile Include="MessageFormatter.cs" />
     <Compile Include="MigratorCommands.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,6 +64,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -60,14 +60,16 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="ActivatorFacadeTests.cs" />
+    <Compile Include="Assembly\ActivatorFacadeTests.cs" />
     <Compile Include="BootstrapperTests.cs" />
     <Compile Include="CommandLine\CommandLineBinderTests.cs" />
     <Compile Include="CommandLine\MigratorCommandLineParserModelValidatorTests.cs" />
+    <Compile Include="MessageFormatterTests.cs" />
     <Compile Include="MigratorCommandLineParserTests.cs" />
     <Compile Include="CommandLine\NativeMethods.cs" />
     <Compile Include="MigratorCommandsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringExtensionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

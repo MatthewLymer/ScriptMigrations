@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using SystemWrappers.Interfaces;
+using SystemWrappers.Interfaces.Diagnostics;
 using Migrator;
 using Migrator.Runners;
+using MigratorConsole.Assembly;
 using MigratorConsole.Properties;
 
 namespace MigratorConsole
@@ -12,12 +14,14 @@ namespace MigratorConsole
         private readonly IConsole _console;
         private readonly IMigrationServiceFactory _migrationServiceFactory;
         private readonly IActivatorFacade _activatorFacade;
+        private readonly IStopwatch _stopwatch;
 
-        public MigratorCommands(IConsole console, IMigrationServiceFactory migrationServiceFactory, IActivatorFacade activatorFacade)
+        public MigratorCommands(IConsole console, IMigrationServiceFactory migrationServiceFactory, IActivatorFacade activatorFacade, IStopwatch stopwatch)
         {
             _console = console;
             _migrationServiceFactory = migrationServiceFactory;
             _activatorFacade = activatorFacade;
+            _stopwatch = stopwatch;
         }
 
         public void ShowHelp()
@@ -76,12 +80,14 @@ namespace MigratorConsole
 
         private void OnMigrationStarted(object sender, MigrationStartedEventArgs args)
         {
-            _console.Write(Resources.StartingMigrationMessageFormat, args.Version, args.Name);
+            _console.Write(MessageFormatter.FormatMigrationStartedMessage(args.Version, args.Name));
+
+            _stopwatch.Restart();
         }
 
         private void OnMigrationCompleted(object sender, EventArgs args)
         {
-            _console.WriteLine(Resources.CompletedMigrationMessage);
+            _console.WriteLine(MessageFormatter.FormatMigrationCompletedMessage(_stopwatch.Elapsed));
         }
 
         private void WriteResultCodeErrorLine(ActivatorResultCode resultCode, string runnerQualifiedName)

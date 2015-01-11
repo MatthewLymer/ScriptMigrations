@@ -135,9 +135,9 @@
     <value>cannot show help and migrate at the same time</value>
   </data>
   <data name="StartingMigrationMessageFormat" xml:space="preserve">
-    <value>Starting migration {0}, '{1}'...</value>
+    <value>Starting migration {0}, '{1}'... </value>
   </data>
   <data name="CompletedMigrationMessage" xml:space="preserve">
-    <value>Completed!</value>
+    <value>Done! ({0} s)</value>
   </data>
 </root>

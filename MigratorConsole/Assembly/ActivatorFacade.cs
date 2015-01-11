@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 
-namespace MigratorConsole
+namespace MigratorConsole.Assembly
 {
     public sealed class ActivatorFacade : IActivatorFacade
     {
@@ -12,7 +11,7 @@ namespace MigratorConsole
 
             try
             {
-                var assembly = Assembly.Load(parsed.AssemblyName);
+                var assembly = System.Reflection.Assembly.Load(parsed.AssemblyName);
                 var type = assembly.GetType(parsed.TypeName);
 
                 if (type == null)
