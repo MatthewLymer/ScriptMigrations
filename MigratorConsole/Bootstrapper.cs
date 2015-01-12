@@ -40,17 +40,14 @@ namespace MigratorConsole
 
         private void ExecuteSuccessfulCommand(MigratorCommandLineParserModel model)
         {
-            if (model.ShowHelp)
-            {
-                _migratorCommands.ShowHelp();
-            }
-
             if (model.MigrateUp)
             {
                 _migratorCommands.MigrateUp(
                     model.RunnerQualifiedName,
                     model.ConnectionString,
                     model.ScriptsPath);
+
+                return;
             }
 
             if (model.MigrateDown)
@@ -62,7 +59,11 @@ namespace MigratorConsole
                     model.ConnectionString,
                     model.ScriptsPath,
                     model.Version.Value);
+
+                return;
             }
+
+            _migratorCommands.ShowHelp();
         }
     }
 }

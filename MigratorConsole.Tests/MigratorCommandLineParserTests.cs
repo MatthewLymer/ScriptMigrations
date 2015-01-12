@@ -42,9 +42,9 @@ namespace MigratorConsole.Tests
             }
 
             [Test]
-            [TestCase("/command=up")]
-            [TestCase("/COMMAND=UP")]
-            [TestCase("/coMMAnd=uP")]
+            [TestCase("/up")]
+            [TestCase("/UP")]
+            [TestCase("/uP")]
             public void ShouldHaveCommandPropertySetToMigrateUpIfRequested(string commandLine)
             {
                 var result = ParseCommandLine(commandLine);
@@ -53,9 +53,9 @@ namespace MigratorConsole.Tests
             }
 
             [Test]
-            [TestCase("/command=down")]
-            [TestCase("/commAND=DoWn")]
-            [TestCase("/COMMAND=DOWN")]
+            [TestCase("/down")]
+            [TestCase("/DoWn")]
+            [TestCase("/DOWN")]
             public void ShouldHaveCommandPropertySetToMigrateDownIfRequested(string commandLine)
             {
                 var result = ParseCommandLine(commandLine);

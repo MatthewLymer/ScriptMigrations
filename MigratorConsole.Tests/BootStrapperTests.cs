@@ -89,27 +89,24 @@ namespace MigratorConsole.Tests
 
                 _bootstrapper = new Bootstrapper(_mockMigratorCommands.Object, _mockCommandLineBinder.Object);
             }
-
+            
             [Test]
-            public void ShouldNotExecuteAnyCommand()
-            {
-                var model = new MigratorCommandLineParserModel();
-
-                InvokeBootstrapper(model);
-
-                foreach (var expression in MigratorCommandsExpressions)
-                {
-                    _mockMigratorCommands.Verify(expression, Times.Never);
-                }
-            }
-
-            [Test]
-            public void ShouldExecuteShowHelpCommand()
+            public void ShouldExecuteShowHelpCommandIfRequestedExplicitly()
             {
                 var model = new MigratorCommandLineParserModel 
                 {
                     ShowHelp = true
                 };
+
+                InvokeBootstrapper(model);
+
+                AssertOneCommandExecuted(m => m.ShowHelp());
+            }
+
+            [Test]
+            public void ShouldExecuteShowHelpCommandIfNothingIsExplicitlyAsked()
+            {
+                var model = new MigratorCommandLineParserModel();
 
                 InvokeBootstrapper(model);
 

@@ -106,7 +106,15 @@ namespace MigratorConsole.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This is my help message.
+        ///   Looks up a localized string similar to Project Url: https://github.com/MatthewLymer/ScriptMigrations
+        ///
+        ///Example: MigratorConsole.exe /up /runner=&quot;assembly, namespace.type&quot; /connectionstring=&quot;my-connection-string&quot; /scripts=&quot;C:/my-scripts&quot;
+        ///
+        ///[/up] 
+        ///Perform all up migrations that have not yet been run on target database, in ascending order.
+        ///
+        ///[/down /version=X]
+        ///Perform down migrations that have been run on target database, in descending order, where the migration version is greater than X.  Migration with version X must exist in database or be  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string HelpUsage {
             get {

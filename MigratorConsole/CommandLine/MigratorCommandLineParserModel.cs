@@ -5,10 +5,10 @@
         [CommandLineAlias("?")]
         public bool ShowHelp { get; set; }
 
-        [CommandLineAlias("command=up")]
+        [CommandLineAlias("up")]
         public bool MigrateUp { get; set; }
 
-        [CommandLineAlias("command=down")]
+        [CommandLineAlias("down")]
         public bool MigrateDown { get; set; }
 
         [CommandLineAlias("Version")]
