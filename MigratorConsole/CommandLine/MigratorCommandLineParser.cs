@@ -15,47 +15,70 @@ namespace MigratorConsole.CommandLine
 
             foreach (var attributedProperty in GetAttributedProperties())
             {
-                var alias = attributedProperty.Attribute.Alias;
-                var property = attributedProperty.Property;
-
-                if (property.PropertyType.IsAssignableFrom(typeof (bool)))
-                {
-                    var found = args.Any(a => ("/" + alias).Equals(a, StringComparison.OrdinalIgnoreCase));
-                    property.SetValue(model, found, null);
-                }
-                else
-                {
-                    var converter = TypeDescriptor.GetConverter(property.PropertyType);
-
-                    var escapedPropertyName = Regex.Escape(alias);
-
-                    var regex = new Regex("/" + escapedPropertyName + "=(.+)", RegexOptions.IgnoreCase);
-
-                    var match = args.Select(arg => regex.Match(arg)).FirstOrDefault(m => m.Success);
-
-                    if (match == null)
-                    {
-                        continue;
-                    }
-
-                    var value = converter.ConvertFromInvariantString(match.Groups[1].Value);
-
-                    property.SetValue(model, value, null);
-                }
+                ReadAndAssignProperty(model, args, attributedProperty);
             }
 
             return model;
         }
 
+        private static void ReadAndAssignProperty(TModel model, IEnumerable<string> args, AttributedProperty attributedProperty)
+        {
+            var alias = attributedProperty.Attribute.Alias;
+            var property = attributedProperty.Property;
+
+            if (property.PropertyType.IsAssignableFrom(typeof (bool)))
+            {
+                property.SetValue(model, DoesAliasExist(args, alias), null);
+            }
+            else
+            {
+                string text;
+                
+                if (!TryGetAliasValue(args, alias, out text))
+                {
+                    return;
+                }
+
+                var value = ConvertStringToType(property.PropertyType, text);
+
+                property.SetValue(model, value, null);
+            }
+        }
+
         private static IEnumerable<AttributedProperty> GetAttributedProperties()
         {
-            var items = typeof (TModel)
+            return typeof (TModel)
                 .GetProperties()
                 .Select(p => new {Property = p, Attributes = p.GetCustomAttributes(typeof (CommandLineAliasAttribute), true)})
                 .Where(p => p.Attributes.Length == 1)
                 .Select(p => new AttributedProperty{ Property = p.Property, Attribute = (CommandLineAliasAttribute) p.Attributes.First()});
+        }
 
-            return items;
+        private static bool DoesAliasExist(IEnumerable<string> args, string alias)
+        {
+            return args.Any(a => ("/" + alias).Equals(a, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool TryGetAliasValue(IEnumerable<string> args, string alias, out string text)
+        {
+            var regex = new Regex("/" + Regex.Escape(alias) + "=(.+)", RegexOptions.IgnoreCase);
+
+            var match = args.Select(arg => regex.Match(arg)).FirstOrDefault(m => m.Success);
+
+            if (match == null)
+            {
+                text = null;
+                return false;
+            }
+
+            text = match.Groups[1].Value;
+            return true;
+        }
+
+        private static object ConvertStringToType(Type type, string text)
+        {
+            var converter = TypeDescriptor.GetConverter(type);
+            return converter.ConvertFromInvariantString(text);
         }
 
         private class AttributedProperty
