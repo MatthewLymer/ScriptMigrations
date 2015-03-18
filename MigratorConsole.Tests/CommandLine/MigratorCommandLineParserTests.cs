@@ -1,8 +1,7 @@
 ﻿using MigratorConsole.CommandLine;
-using MigratorConsole.Tests.CommandLine;
 using NUnit.Framework;
 
-namespace MigratorConsole.Tests
+namespace MigratorConsole.Tests.CommandLine
 {
     class MigratorCommandLineParserTests
     {

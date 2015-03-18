@@ -25,15 +25,9 @@ namespace MigratorConsole.Tests.Assembly
             [TestCase(",b")]
             public void ShouldThrowExceptionIfQualifiedNameIsNotValid(string qualifiedName)
             {
-                try
-                {
-                    _activator.CreateInstance<object>(qualifiedName);
-                    Assert.Fail();
-                }
-                catch (ArgumentException e)
-                {
-                    Assert.AreEqual("qualifiedName", e.ParamName);
-                }
+                var exception = Assert.Catch<ArgumentException>(() => _activator.CreateInstance<object>(qualifiedName));
+
+                Assert.AreEqual("qualifiedName", exception.ParamName);
             }
 
             [Test]
