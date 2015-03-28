@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigratorConsole.Tests", "Mi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemWrappers", "SystemWrappers\SystemWrappers.csproj", "{52E236FD-3472-448C-87E0-7F09F86273F5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Build", "Build\Build.csproj", "{9DE228CC-D444-4F98-AF57-58D737773939}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,8 @@ Global
 		{52E236FD-3472-448C-87E0-7F09F86273F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52E236FD-3472-448C-87E0-7F09F86273F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52E236FD-3472-448C-87E0-7F09F86273F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DE228CC-D444-4F98-AF57-58D737773939}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{9DE228CC-D444-4F98-AF57-58D737773939}.Release|Any CPU.ActiveCfg = Debug|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
