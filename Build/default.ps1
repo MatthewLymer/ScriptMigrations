@@ -12,7 +12,7 @@ function Normalize-Path($path) {
 	elseif (!$outputDirectory.Contains(':')) {
 		$path = Join-Path $pwd $path
 	}	
-
+	
 	$path
 }
 
@@ -25,8 +25,9 @@ task Coalesce -Depends Test {
 	$artifactPath = Join-Path $outputDirectory 'Artifact'
 
 	function Robocopy-Project($projectName) {
+		$src = Join-Path $outputDirectory $projectName
+
 		exec {
-			$src = Join-Path $outputDirectory $projectName
 			&$robocopyPath $src $artifactPath '/E'
 
 			if ($global:LastExitCode -Lt 8) {
@@ -45,8 +46,9 @@ task Test -Depends Compile {
 	$solutionDirectory = Normalize-Path $solutionDirectory
 
 	function Run-Tests($projectName) {
+		$projectPath = Join-Path $outputDirectory "$projectName\$projectName.dll"
+
 		exec {
-			$projectPath = Join-Path $outputDirectory "$projectName\$projectName.dll"
 			.\nunit\bin\nunit-console.exe $projectPath
 		}
 	}
@@ -61,9 +63,10 @@ task Compile -Depends NugetPackageRestore {
 	$solutionDirectory = Normalize-Path $solutionDirectory
 
 	function Build-Project($projectName) {
+		$projectPath = Join-Path $solutionDirectory "$projectName\$projectName.csproj"
+		$outDir = Join-Path $outputDirectory $projectName
+
 		exec {
-			$projectPath = Join-Path $solutionDirectory "$projectName\$projectName.csproj"
-			$outDir = Join-Path $outputDirectory $projectName
 			msbuild $projectPath /t:'Clean,Build' /p:Configuration=$configuration /p:OutDir=$outDir
 		}
 	}
@@ -78,8 +81,9 @@ task Compile -Depends NugetPackageRestore {
 
 task NugetPackageRestore {
 	$solutionDirectory = Normalize-Path $solutionDirectory
+	$solutionPath = Join-Path $solutionDirectory "ScriptMigrations.sln"
 
 	exec {
-		.\nuget.exe restore $solutionDirectory
-	}	
+		.\nuget.exe restore $solutionPath
+	}
 }
