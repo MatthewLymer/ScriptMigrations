@@ -49,7 +49,7 @@ task Test -Depends Compile {
 		$projectPath = Join-Path $outputDirectory "$projectName\$projectName.dll"
 
 		exec {
-			.\nunit\bin\nunit-console.exe $projectPath
+			.\nunit\nunit-console.exe $projectPath
 		}
 	}
 
