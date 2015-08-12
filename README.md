@@ -7,6 +7,11 @@ This concept has two major concepts: Runners and Scripts
 
 Scripts are the database changes you would like to apply, and runners are the interface between the application and the database.
 
+<h2>Building</h2>
+Browse to the `.\Builds` folder in PowerShell, execute the following command:
+
+	.\build-default.ps1
+
 <h2>Scripts</h2>
 Scripts are to be named with the format `YYYYMMDDHHMMSS_ScriptName_(up|down).sql`.  The 'UP' migration will perform actions to bring the database forward in time, while 'DOWN' does the inverse.
 
