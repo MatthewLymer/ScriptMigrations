@@ -16,13 +16,35 @@ function Normalize-Path($path) {
 	$path
 }
 
-task Default -Depends Coalesce
+function Build-Project($projectName) {
+	$projectPath = Join-Path (SolutionDirectory) "$projectName\$projectName.csproj"
+	$outDir = Join-Path (OutputDirectory) $projectName
 
-task Coalesce -Depends Test {
-	$outputDirectory = Normalize-Path $outputDirectory
-	$solutionDirectory = Normalize-Path $solutionDirectory
+	exec {
+		msbuild $projectPath /t:'Clean,Build' /p:Configuration=$configuration /p:OutDir=$outDir
+	}
+}
 
-	$artifactPath = Join-Path $outputDirectory 'Artifact'
+function Run-Tests($projectName) {
+	$projectPath = Join-Path (OutputDirectory) "$projectName\$projectName.dll"
+
+	exec {
+		.\nunit\nunit-console.exe $projectPath
+	}
+}
+
+function OutputDirectory {
+	Normalize-Path $outputDirectory	
+}
+
+function SolutionDirectory {
+	Normalize-Path $solutionDirectory
+}
+
+task Default -Depends RunTests, Coalesce
+
+task Coalesce -Depends CompileApp {
+	$artifactPath = Join-Path (OutputDirectory) 'Artifact'
 
 	function Robocopy-Project($projectName) {
 		$src = Join-Path $outputDirectory $projectName
@@ -41,47 +63,28 @@ task Coalesce -Depends Test {
 	Robocopy-Project 'SqlServerMigrator' 
 }
 
-task Test -Depends Compile {
-	$outputDirectory = Normalize-Path $outputDirectory
-	$solutionDirectory = Normalize-Path $solutionDirectory
-
-	function Run-Tests($projectName) {
-		$projectPath = Join-Path $outputDirectory "$projectName\$projectName.dll"
-
-		exec {
-			.\nunit\nunit-console.exe $projectPath
-		}
-	}
-
+task RunTests -Depends CompileTests {
 	Run-Tests 'Migrator.Tests'
 	Run-Tests 'MigratorConsole.Tests'
 	Run-Tests 'SqlServerMigrator.Tests'
 }
 
-task Compile -Depends NugetPackageRestore {
-	$outputDirectory = Normalize-Path $outputDirectory
-	$solutionDirectory = Normalize-Path $solutionDirectory
-
-	function Build-Project($projectName) {
-		$projectPath = Join-Path $solutionDirectory "$projectName\$projectName.csproj"
-		$outDir = Join-Path $outputDirectory $projectName
-
-		exec {
-			msbuild $projectPath /t:'Clean,Build' /p:Configuration=$configuration /p:OutDir=$outDir
-		}
-	}
-
+task CompileApp -Depends NugetPackageRestore {
 	Build-Project 'Migrator'
-	Build-Project 'Migrator.Tests'
 	Build-Project 'MigratorConsole'
-	Build-Project 'MigratorConsole.Tests'
 	Build-Project 'SqlServerMigrator'
+}
+
+task CompileTests -Depends NugetPackageRestore {
+	Build-Project 'Migrator.Tests'
+	Build-Project 'MigratorConsole.Tests'
 	Build-Project 'SqlServerMigrator.Tests'
 }
 
 task NugetPackageRestore {
-	$solutionDirectory = Normalize-Path $solutionDirectory
-	$solutionPath = Join-Path $solutionDirectory "ScriptMigrations.sln"
+	$solutionPath = Join-Path (SolutionDirectory) "ScriptMigrations.sln"
+
+	Write-Host $solutionPath
 
 	exec {
 		.\nuget.exe restore $solutionPath

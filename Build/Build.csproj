@@ -7,11 +7,10 @@
   <Target Name="Rebuild" />
   <Target Name="Clean" />
   <ItemGroup>
+    <None Include="build-default.ps1" />
     <None Include="default.ps1" />
     <None Include="nunit\nunit-agent.exe.config" />
     <None Include="nunit\nunit-console.exe.config" />
-    <None Include="psake\psake.cmd" />
-    <None Include="psake\psake.ps1" />
     <None Include="psake\psake.psm1" />
   </ItemGroup>
   <ItemGroup>
@@ -27,7 +26,5 @@
     <Content Include="nunit\nunit-console.exe" />
     <Content Include="psake\en-US\psake.psm1-help.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="nunit\addins\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>
