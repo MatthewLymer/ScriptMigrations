@@ -3,7 +3,7 @@ using System.Linq;
 using SystemWrappers.Interfaces;
 using SystemWrappers.Interfaces.Diagnostics;
 using Migrator;
-using Migrator.Runners;
+using Migrator.Shared.Runners;
 using MigratorConsole.Assembly;
 using MigratorConsole.Properties;
 using Moq;

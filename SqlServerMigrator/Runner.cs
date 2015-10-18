@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlClient;
-using Migrator;
+using Migrator.Shared;
 
 namespace SqlServerMigrator
 {

@@ -62,6 +62,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Migrator.Shared\Migrator.Shared.csproj">
+      <Project>{3219df5c-a09a-4df5-9897-40d8ae4780b9}</Project>
+      <Name>Migrator.Shared</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Migrator\Migrator.csproj">
       <Project>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</Project>
       <Name>Migrator</Name>

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace Migrator.Migrations
+namespace Migrator.Shared.Migrations
 {
     public interface IMigrationFinder
     {

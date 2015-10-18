@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Migrator.Exceptions;
-using Migrator.Migrations;
-using Migrator.Runners;
+using Migrator.Shared.Migrations;
+using Migrator.Shared.Runners;
 
 namespace Migrator
 {

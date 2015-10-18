@@ -1,5 +1,5 @@
 ﻿using System;
-using Migrator.Runners;
+using Migrator.Shared.Runners;
 
 namespace SqlServerMigrator
 {

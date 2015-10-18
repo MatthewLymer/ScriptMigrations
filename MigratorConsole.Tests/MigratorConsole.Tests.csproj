@@ -75,6 +75,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Migrator.Shared\Migrator.Shared.csproj">
+      <Project>{3219DF5C-A09A-4DF5-9897-40D8AE4780B9}</Project>
+      <Name>Migrator.Shared</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MigratorConsole\MigratorConsole.csproj">
       <Project>{21889C3D-D9C4-40D6-A4E4-971735D19EE2}</Project>
       <Name>MigratorConsole</Name>

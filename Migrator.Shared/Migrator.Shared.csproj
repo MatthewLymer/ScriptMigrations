@@ -1,16 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</ProjectGuid>
+    <ProjectGuid>{3219DF5C-A09A-4DF5-9897-40D8AE4780B9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Migrator</RootNamespace>
-    <AssemblyName>Migrator</AssemblyName>
+    <RootNamespace>Migrator.Shared</RootNamespace>
+    <AssemblyName>Migrator.Shared</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,28 +35,13 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IMigrationService.cs" />
-    <Compile Include="Exceptions\DuplicateMigrationVersionException.cs" />
-    <Compile Include="Migrations\FileSystemMigrationFinder.cs" />
-    <Compile Include="Exceptions\MigrationFailedException.cs" />
-    <Compile Include="Exceptions\MigrationMissingException.cs" />
-    <Compile Include="MigrationService.cs" />
-    <Compile Include="Exceptions\VersionNeverExecutedException.cs" />
-    <Compile Include="Exceptions\MissingDownMigrationException.cs" />
+    <Compile Include="HistoryTableRunnerTemplate.cs" />
+    <Compile Include="Migrations\DownMigration.cs" />
+    <Compile Include="Migrations\IMigrationFinder.cs" />
+    <Compile Include="Migrations\UpMigration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScriptCompletedEventArgs.cs" />
-    <Compile Include="MigrationStartedEventArgs.cs" />
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <ProjectReference Include="..\Migrator.Shared\Migrator.Shared.csproj">
-      <Project>{3219df5c-a09a-4df5-9897-40d8ae4780b9}</Project>
-      <Name>Migrator.Shared</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SystemWrappers\SystemWrappers.csproj">
-      <Project>{52E236FD-3472-448C-87E0-7F09F86273F5}</Project>
-      <Name>SystemWrappers</Name>
-    </ProjectReference>
+    <Compile Include="Runners\IRunner.cs" />
+    <Compile Include="Runners\IRunnerFactory.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

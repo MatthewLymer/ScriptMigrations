@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Migrator.Migrations;
+using Migrator.Shared.Migrations;
 using NUnit.Framework;
 
-namespace Migrator.Tests
+namespace Migrator.Shared.Tests
 {
     class HistoryPersistingRunnerTemplateTests
     {

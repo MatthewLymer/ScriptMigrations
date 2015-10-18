@@ -1,5 +1,5 @@
 ﻿using Migrator;
-using Migrator.Runners;
+using Migrator.Shared.Runners;
 
 namespace MigratorConsole
 {

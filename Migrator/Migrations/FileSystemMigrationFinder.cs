@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using SystemWrappers.Interfaces.IO;
+using Migrator.Shared.Migrations;
 
 namespace Migrator.Migrations
 {

@@ -1,4 +1,4 @@
-﻿namespace Migrator.Runners
+namespace Migrator.Shared.Runners
 {
     public interface IRunnerFactory
     {

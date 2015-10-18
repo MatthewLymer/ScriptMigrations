@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Migrator.Migrations;
-using Migrator.Runners;
+using Migrator.Shared.Migrations;
+using Migrator.Shared.Runners;
 
-namespace Migrator
+namespace Migrator.Shared
 {
     public abstract class HistoryTableRunnerTemplate : IRunner
     {

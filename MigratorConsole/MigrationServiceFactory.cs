@@ -1,7 +1,7 @@
 ﻿using SystemWrappers.Wrappers.IO;
 using Migrator;
 using Migrator.Migrations;
-using Migrator.Runners;
+using Migrator.Shared.Runners;
 
 namespace MigratorConsole
 {

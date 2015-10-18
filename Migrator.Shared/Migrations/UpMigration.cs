@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Migrator.Migrations
+namespace Migrator.Shared.Migrations
 {
     public sealed class UpMigration
     {
