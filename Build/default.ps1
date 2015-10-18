@@ -5,6 +5,9 @@
 	$robocopyPath = 'C:\Windows\System32\robocopy.exe'
 }
 
+$outputProjects = @('Migrator.Console', 'SqlServerMigrator')
+$testProjects = @('Migrator.Core.Tests', 'Migrator.Console.Tests', 'Migrator.Shared.Tests', 'SqlServerMigrator.Tests')
+
 task Default -Depends RunTests, Coalesce
 
 task Coalesce -Depends CompileApp {
@@ -21,28 +24,28 @@ task Coalesce -Depends CompileApp {
 			}
 		}
 	}
-	
-	Robocopy-Project 'MigratorConsole'
-	Robocopy-Project 'SqlServerMigrator' 
-}
 
-task RunTests -Depends CompileTests {
-	Run-Tests 'Migrator.Tests'
-	Run-Tests 'MigratorConsole.Tests'
-	Run-Tests 'SqlServerMigrator.Tests'
-	Run-Tests 'Migrator.Shared.Tests'
+	$outputProjects | ForEach-Object {
+		Robocopy-Project $_
+	}
 }
 
 task CompileApp -Depends NugetPackageRestore {
-	Build-Project 'MigratorConsole'
-	Build-Project 'SqlServerMigrator'
+	$outputProjects | ForEach-Object {
+		Build-Project $_
+	}
+}
+
+task RunTests -Depends CompileTests {
+	$testProjects | ForEach-Object {
+		Run-Tests $_
+	}
 }
 
 task CompileTests -Depends NugetPackageRestore {
-	Build-Project 'Migrator.Tests'
-	Build-Project 'MigratorConsole.Tests'
-	Build-Project 'SqlServerMigrator.Tests'
-	Build-Project 'Migrator.Shared.Tests'
+	$testProjects | ForEach-Object {
+		Build-Project $_
+	}
 }
 
 task NugetPackageRestore {

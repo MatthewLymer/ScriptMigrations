@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{21889C3D-D9C4-40D6-A4E4-971735D19EE2}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Migrator.Console</RootNamespace>
+    <AssemblyName>Migrator.Console</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FluentValidation">
+      <HintPath>..\packages\FluentValidation.5.4.0.0\lib\Net40\FluentValidation.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.2.2.0\lib\net40\Ninject.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assembly\ActivatorFacade.cs" />
+    <Compile Include="Assembly\ActivatorResult.cs" />
+    <Compile Include="CommandLineLauncher.cs" />
+    <Compile Include="CommandLine\CommandLineBinder.cs" />
+    <Compile Include="CommandLine\CommandLineBinderResult.cs" />
+    <Compile Include="CommandLine\ICommandLineBinder.cs" />
+    <Compile Include="CommandLine\ICommandLineParser.cs" />
+    <Compile Include="CommandLine\MigratorCommandLineParserModelValidator.cs" />
+    <Compile Include="Assembly\IActivatorFacade.cs" />
+    <Compile Include="IMigrationServiceFactory.cs" />
+    <Compile Include="IMigratorCommands.cs" />
+    <Compile Include="CommandLine\MigratorCommandLineParser.cs" />
+    <Compile Include="CommandLine\MigratorCommandLineParserModel.cs" />
+    <Compile Include="CommandLine\CommandLineAliasAttribute.cs" />
+    <Compile Include="MessageFormatter.cs" />
+    <Compile Include="MigrationServiceFactory.cs" />
+    <Compile Include="MigratorCommands.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="StringExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Migrator.Core\Migrator.Core.csproj">
+      <Project>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</Project>
+      <Name>Migrator.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Migrator.Shared\Migrator.Shared.csproj">
+      <Project>{3219DF5C-A09A-4DF5-9897-40D8AE4780B9}</Project>
+      <Name>Migrator.Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SystemWrappers\SystemWrappers.csproj">
+      <Project>{52E236FD-3472-448C-87E0-7F09F86273F5}</Project>
+      <Name>SystemWrappers</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

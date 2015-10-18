@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migrator", "Migrator\Migrator.csproj", "{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migrator.Core", "Migrator.Core\Migrator.Core.csproj", "{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migrator.Tests", "Migrator.Tests\Migrator.Tests.csproj", "{73FA05D2-BB2A-4BDF-A30B-92906BC03A77}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migrator.Core.Tests", "Migrator.Core.Tests\Migrator.Core.Tests.csproj", "{73FA05D2-BB2A-4BDF-A30B-92906BC03A77}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerMigrator", "SqlServerMigrator\SqlServerMigrator.csproj", "{B055C78E-B031-4CB2-963D-155BCEBD1958}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerMigrator.Tests", "SqlServerMigrator.Tests\SqlServerMigrator.Tests.csproj", "{77244B97-E8EF-4B0D-B7C3-2C0C25C2987D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigratorConsole", "MigratorConsole\MigratorConsole.csproj", "{21889C3D-D9C4-40D6-A4E4-971735D19EE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migrator.Console", "Migrator.Console\Migrator.Console.csproj", "{21889C3D-D9C4-40D6-A4E4-971735D19EE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigratorConsole.Tests", "MigratorConsole.Tests\MigratorConsole.Tests.csproj", "{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migrator.Console.Tests", "Migrator.Console.Tests\Migrator.Console.Tests.csproj", "{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemWrappers", "SystemWrappers\SystemWrappers.csproj", "{52E236FD-3472-448C-87E0-7F09F86273F5}"
 EndProject

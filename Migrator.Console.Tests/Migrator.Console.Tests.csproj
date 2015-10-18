@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{77244B97-E8EF-4B0D-B7C3-2C0C25C2987D}</ProjectGuid>
+    <ProjectGuid>{6C894B5B-3565-45CC-9AD4-D9D7E28904BE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SqlServerMigrator.Tests</RootNamespace>
-    <AssemblyName>SqlServerMigrator.Tests</AssemblyName>
+    <RootNamespace>Migrator.Console.Tests</RootNamespace>
+    <AssemblyName>Migrator.Console.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -37,6 +37,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FluentValidation">
+      <HintPath>..\packages\FluentValidation.5.4.0.0\lib\Net40\FluentValidation.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.1.1311.0615\lib\net40\Moq.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -54,21 +60,36 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Assembly\ActivatorFacadeTests.cs" />
+    <Compile Include="CommandLineLauncherTests.cs" />
+    <Compile Include="CommandLine\CommandLineBinderTests.cs" />
+    <Compile Include="CommandLine\MigratorCommandLineParserModelValidatorTests.cs" />
+    <Compile Include="MessageFormatterTests.cs" />
+    <Compile Include="CommandLine\MigratorCommandLineParserTests.cs" />
+    <Compile Include="CommandLine\NativeMethods.cs" />
+    <Compile Include="MigratorCommandsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RunnerFactoryTests.cs" />
-    <Compile Include="SqlBatchSplitterTests.cs" />
+    <Compile Include="StringExtensionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Migrator.Core\Migrator.Core.csproj">
+      <Project>{F7741876-AFFF-468A-BFB5-B0FA5AC157D0}</Project>
+      <Name>Migrator.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Migrator.Shared\Migrator.Shared.csproj">
-      <Project>{3219df5c-a09a-4df5-9897-40d8ae4780b9}</Project>
+      <Project>{3219DF5C-A09A-4DF5-9897-40D8AE4780B9}</Project>
       <Name>Migrator.Shared</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SqlServerMigrator\SqlServerMigrator.csproj">
-      <Project>{B055C78E-B031-4CB2-963D-155BCEBD1958}</Project>
-      <Name>SqlServerMigrator</Name>
+    <ProjectReference Include="..\Migrator.Console\Migrator.Console.csproj">
+      <Project>{21889C3D-D9C4-40D6-A4E4-971735D19EE2}</Project>
+      <Name>MigratorConsole</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SystemWrappers\SystemWrappers.csproj">
+      <Project>{52E236FD-3472-448C-87E0-7F09F86273F5}</Project>
+      <Name>SystemWrappers</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
