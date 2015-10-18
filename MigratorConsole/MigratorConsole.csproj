@@ -37,13 +37,17 @@
     <Reference Include="FluentValidation">
       <HintPath>..\packages\FluentValidation.5.4.0.0\lib\Net40\FluentValidation.dll</HintPath>
     </Reference>
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.2.2.0\lib\net40\Ninject.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assembly\ActivatorFacade.cs" />
     <Compile Include="Assembly\ActivatorResult.cs" />
-    <Compile Include="Bootstrapper.cs" />
+    <Compile Include="CommandLineLauncher.cs" />
     <Compile Include="CommandLine\CommandLineBinder.cs" />
     <Compile Include="CommandLine\CommandLineBinderResult.cs" />
     <Compile Include="CommandLine\ICommandLineBinder.cs" />
@@ -56,6 +60,7 @@
     <Compile Include="CommandLine\MigratorCommandLineParserModel.cs" />
     <Compile Include="CommandLine\CommandLineAliasAttribute.cs" />
     <Compile Include="MessageFormatter.cs" />
+    <Compile Include="MigrationServiceFactory.cs" />
     <Compile Include="MigratorCommands.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

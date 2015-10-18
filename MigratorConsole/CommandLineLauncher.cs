@@ -4,12 +4,12 @@ using MigratorConsole.CommandLine;
 
 namespace MigratorConsole
 {
-    public class Bootstrapper
+    public class CommandLineLauncher
     {
         private readonly IMigratorCommands _migratorCommands;
         private readonly ICommandLineBinder<MigratorCommandLineParserModel> _commandLineBinder;
 
-        public Bootstrapper(IMigratorCommands migratorCommands, ICommandLineBinder<MigratorCommandLineParserModel> commandLineBinder)
+        public CommandLineLauncher(IMigratorCommands migratorCommands, ICommandLineBinder<MigratorCommandLineParserModel> commandLineBinder)
         {
             if (migratorCommands == null)
             {

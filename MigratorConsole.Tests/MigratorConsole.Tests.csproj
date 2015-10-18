@@ -61,7 +61,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Assembly\ActivatorFacadeTests.cs" />
-    <Compile Include="BootstrapperTests.cs" />
+    <Compile Include="CommandLineLauncherTests.cs" />
     <Compile Include="CommandLine\CommandLineBinderTests.cs" />
     <Compile Include="CommandLine\MigratorCommandLineParserModelValidatorTests.cs" />
     <Compile Include="MessageFormatterTests.cs" />

@@ -8,16 +8,16 @@ using NUnit.Framework;
 
 namespace MigratorConsole.Tests
 {
-    class BootstrapperTests
+    class CommandLineLauncherTests
     {
         [TestFixture]
-        public class WhenCreatingABoostrapperInstance
+        public class WhenCreatingCommandLineLauncherInstance
         {
             [Test]
             [ExpectedException(typeof(ArgumentNullException))]
             public void ShouldThrowExceptionForArgumentMigratorCommands()
             {
-                Assert.IsNotNull(new Bootstrapper(null, null));
+                Assert.IsNotNull(new CommandLineLauncher(null, null));
             }
 
             [Test]
@@ -25,12 +25,12 @@ namespace MigratorConsole.Tests
             public void ShouldThrowExceptionForArgumentCommandLineBinder()
             {
                 var migratorCommands = new Mock<IMigratorCommands>().Object;
-                Assert.IsNotNull(new Bootstrapper(migratorCommands, null));
+                Assert.IsNotNull(new CommandLineLauncher(migratorCommands, null));
             }
         }
 
         [TestFixture]
-        public class WhenTellingBootstrapperToStart
+        public class WhenTellingCommandLineLauncherToStart
         {
             private readonly static Expression<Action<IMigratorCommands>>[] MigratorCommandsExpressions = {
                 m => m.ShowHelp(),
@@ -41,7 +41,7 @@ namespace MigratorConsole.Tests
             private Mock<IMigratorCommands> _mockMigratorCommands;
             private Mock<ICommandLineBinder<MigratorCommandLineParserModel>> _mockCommandLineBinder;
             
-            private Bootstrapper _bootstrapper;
+            private CommandLineLauncher _commandLineLauncher;
 
             private void InvokeBootstrapper(MigratorCommandLineParserModel model)
             {
@@ -61,7 +61,7 @@ namespace MigratorConsole.Tests
 
                 _mockCommandLineBinder.Setup(x => x.Bind(args)).Returns(bindingResult);
 
-                _bootstrapper.Start(args);
+                _commandLineLauncher.Start(args);
             }
 
             private void AssertOneCommandExecuted(Expression<Action<IMigratorCommands>> expression)
@@ -87,7 +87,7 @@ namespace MigratorConsole.Tests
                 _mockMigratorCommands = new Mock<IMigratorCommands>();
                 _mockCommandLineBinder = new Mock<ICommandLineBinder<MigratorCommandLineParserModel>>();
 
-                _bootstrapper = new Bootstrapper(_mockMigratorCommands.Object, _mockCommandLineBinder.Object);
+                _commandLineLauncher = new CommandLineLauncher(_mockMigratorCommands.Object, _mockCommandLineBinder.Object);
             }
             
             [Test]

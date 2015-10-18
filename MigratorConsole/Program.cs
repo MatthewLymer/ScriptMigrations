@@ -1,50 +1,48 @@
-﻿using System.Diagnostics;
+﻿using SystemWrappers.Interfaces;
+using SystemWrappers.Interfaces.Diagnostics;
 using SystemWrappers.Wrappers;
 using SystemWrappers.Wrappers.Diagnostics;
-using SystemWrappers.Wrappers.IO;
-using Migrator;
-using Migrator.Migrations;
-using Migrator.Runners;
+using FluentValidation;
 using MigratorConsole.Assembly;
 using MigratorConsole.CommandLine;
+using Ninject;
+using Ninject.Syntax;
 
 namespace MigratorConsole
 {
-    public class Program
+    class Program
     {
         static void Main(string[] args)
         {
-            var consoleWrapper = new ConsoleWrapper();
+            using (var kernel = new StandardKernel())
+            {
+                RegisterServices(kernel);
 
-            var migrationServiceFactory = new MigrationServiceFactory();
-
-            var activatorFacade = new ActivatorFacade();
-
-            var stopwatch = new StopwatchWrapper(new Stopwatch());
-
-            var migratorCommands = new MigratorCommands(consoleWrapper, migrationServiceFactory, activatorFacade, stopwatch);
-
-            var migratorCommandLineParser = new MigratorCommandLineParser<MigratorCommandLineParserModel>();
-
-            var migratorCommandLineParserModelValidator = new MigratorCommandLineParserModelValidator();
-
-            var commandLineBinder = new CommandLineBinder<MigratorCommandLineParserModel>(migratorCommandLineParser, migratorCommandLineParserModelValidator);
-
-            var bootstrapper = new Bootstrapper(migratorCommands, commandLineBinder);
-
-            bootstrapper.Start(args);
+                kernel.Get<CommandLineLauncher>().Start(args);
+            }
         }
 
-        private class MigrationServiceFactory : IMigrationServiceFactory
+        private static void RegisterServices(IBindingRoot bindingRoot)
         {
-            public IMigrationService Create(string scriptsPath, IRunnerFactory runnerFactory)
-            {
-                var fileSystem = new FileSystemWrapper();
+            bindingRoot.Bind<IConsole>().To<ConsoleWrapper>();
+            
+            bindingRoot.Bind<IMigrationServiceFactory>().To<MigrationServiceFactory>();
+            
+            bindingRoot.Bind<IActivatorFacade>().To<ActivatorFacade>();
+            
+            bindingRoot.Bind<IStopwatch>().To<StopwatchWrapper>();
+            
+            bindingRoot.Bind<IMigratorCommands>().To<MigratorCommands>();
+            
+            bindingRoot.Bind<ICommandLineParser<MigratorCommandLineParserModel>>()
+                .To<MigratorCommandLineParser<MigratorCommandLineParserModel>>();
+            
+            bindingRoot.Bind<ICommandLineBinder<MigratorCommandLineParserModel>>()
+                .To<CommandLineBinder<MigratorCommandLineParserModel>>();
 
-                var scriptFinder = new FileSystemMigrationFinder(fileSystem, scriptsPath);
+            bindingRoot.Bind<AbstractValidator<MigratorCommandLineParserModel>>()
+                .To<MigratorCommandLineParserModelValidator>();
 
-                return new MigrationService(scriptFinder, runnerFactory);
-            }
         }
     }
 }
