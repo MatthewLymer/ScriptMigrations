@@ -121,6 +121,7 @@ namespace SqlServerMigrator
             var command = _connection.CreateCommand();
 
             command.Transaction = _transaction;
+            command.CommandTimeout = 0;
 
             return command;
         }
