@@ -22,7 +22,7 @@ namespace SqlServerMigrator
         {
             _connection = new SqlConnection(connectionString);
             _connection.Open();
-
+            
             _transaction = _connection.BeginTransaction();
         }
 
