@@ -132,6 +132,15 @@ namespace Migrator.Console.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Configuration for runner is not valid..
+        /// </summary>
+        public static string RunnerFactoryTestQueryFailedMessage {
+            get {
+                return ResourceManager.GetString("RunnerFactoryTestQueryFailedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to runner qualified name is not expected format.
         /// </summary>
         public static string RunnerQualifiedNameBadFormat {

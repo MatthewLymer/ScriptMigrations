@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using Migrator.Shared.Runners;
 
 namespace SqlServerMigrator
@@ -20,6 +21,27 @@ namespace SqlServerMigrator
         public IRunner Create()
         {
             return new Runner(_connectionString);
+        }
+
+        public bool CanExecuteTestQuery()
+        {
+            try
+            {
+                using (var connection = new SqlConnection())
+                {
+                    connection.Open();
+
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "SELECT 2 + 3";
+                        return (int) command.ExecuteScalar() == 5;
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+                return false;
+            }
         }
     }
 }

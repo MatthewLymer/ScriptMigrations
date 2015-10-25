@@ -176,4 +176,7 @@ The path to the migration scripts, sub-directories are included</value>
   <data name="CompletedMigrationMessage" xml:space="preserve">
     <value>Done! ({0} s)</value>
   </data>
+  <data name="RunnerFactoryTestQueryFailedMessage" xml:space="preserve">
+    <value>Configuration for runner is not valid.</value>
+  </data>
 </root>

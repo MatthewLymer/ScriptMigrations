@@ -52,17 +52,24 @@ namespace Migrator.Console.Tests
                 Assert.AreEqual(FailureExitCode, Environment.ExitCode);
             }
 
+            protected void AssertRunnerTestQueryFailure()
+            {
+                MockConsole.Verify(x => x.WriteErrorLine(Resources.RunnerFactoryTestQueryFailedMessage));
+
+                Assert.AreEqual(FailureExitCode, Environment.ExitCode);
+            }
+
             protected void SetupActivatorFacade(string runnerQualifiedName, string connectionString, ActivatorResultCode resultCode)
             {
-                _mockActivatorFacade.Setup(
-                    x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString))
+                _mockActivatorFacade
+                    .Setup(x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString))
                     .Returns(new ActivatorResult<IRunnerFactory>(resultCode));
             }
 
             protected void SetupActivatorFacade(string runnerQualifiedName, string connectionString, IRunnerFactory runnerFactory)
             {
-                _mockActivatorFacade.Setup(
-                    x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString))
+                _mockActivatorFacade
+                    .Setup(x => x.CreateInstance<IRunnerFactory>(runnerQualifiedName, connectionString))
                     .Returns(new ActivatorResult<IRunnerFactory>(runnerFactory));
             }
 
@@ -73,9 +80,12 @@ namespace Migrator.Console.Tests
                     .Returns(migrationService);
             }
 
-            protected void SetupActivatorWithServiceFactory(string runnerQualifiedName, string connectionString, string scriptsPath, IMigrationService migrationService)
+            protected void SetupActivatorWithServiceFactory(string runnerQualifiedName, string connectionString, string scriptsPath, IMigrationService migrationService, bool willTestQuerySucceed)
             {
-                var runnerFactory = new Mock<IRunnerFactory>().Object;
+                var mock = new Mock<IRunnerFactory>();
+                mock.Setup(x => x.CanExecuteTestQuery()).Returns(willTestQuerySucceed);
+
+                var runnerFactory = mock.Object;
                 SetupActivatorFacade(runnerQualifiedName, connectionString, runnerFactory);
                 SetupMigrationServiceFactory(runnerFactory, scriptsPath, migrationService);
             }
@@ -170,6 +180,21 @@ namespace Migrator.Console.Tests
 
                 AssertTypeLoadFailure(runnerQualifiedName);
             }
+
+            [Test]
+            public void ShouldGiveErrorIfRunnerFactoryTypeTestQueryFails()
+            {
+                const string scriptsPath = "C:/blah";
+                const string connectionString = "foo";
+
+                var mockMigrationService = new Mock<IMigrationService>();
+
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, connectionString, scriptsPath, mockMigrationService.Object, false);
+
+                Commands.MigrateUp(RunnerQualifiedName, connectionString, scriptsPath);
+
+                AssertRunnerTestQueryFailure();
+            }
             
             [Test]
             [TestCase("server=foo", "C:/zorp")]
@@ -178,7 +203,7 @@ namespace Migrator.Console.Tests
             {
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                SetupActivatorWithServiceFactory(RunnerQualifiedName, connectionString, scriptsPath, mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, connectionString, scriptsPath, mockMigrationService.Object, true);
 
                 Commands.MigrateUp(RunnerQualifiedName, connectionString, scriptsPath);
 
@@ -194,7 +219,7 @@ namespace Migrator.Console.Tests
 
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object, true);
 
                 var eventArgs = new MigrationStartedEventArgs(version, scriptName);
                 mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
@@ -209,7 +234,7 @@ namespace Migrator.Console.Tests
             {
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object, true);
 
                 var eventArgs = new MigrationStartedEventArgs(0, "not-relevant");
                 mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
@@ -232,7 +257,7 @@ namespace Migrator.Console.Tests
 
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object, true);
 
                 mockMigrationService.Setup(x => x.Up()).Callback(() => mockMigrationService.Raise(x => x.OnMigrationCompleted += null, EventArgs.Empty));
 
@@ -272,6 +297,21 @@ namespace Migrator.Console.Tests
             }
 
             [Test]
+            public void ShouldGiveErrorIfRunnerFactoryTypeTestQueryFails()
+            {
+                const string scriptsPath = "C:/blah";
+                const string connectionString = "foo";
+                
+                var mockMigrationService = new Mock<IMigrationService>();
+                
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, connectionString, scriptsPath, mockMigrationService.Object, false);
+
+                Commands.MigrateDown(RunnerQualifiedName, connectionString, scriptsPath, 0);
+
+                AssertRunnerTestQueryFailure();
+            }
+
+            [Test]
             [TestCase("server=foo", "C:/zorp", 0)]
             [TestCase("server=baz", "C:/ping", 1)]
             [TestCase("server=bar", "C:/part", 2)]
@@ -279,7 +319,7 @@ namespace Migrator.Console.Tests
             {
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                SetupActivatorWithServiceFactory(RunnerQualifiedName, connectionString, scriptsPath, mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, connectionString, scriptsPath, mockMigrationService.Object, true);
 
                 Commands.MigrateDown(RunnerQualifiedName, connectionString, scriptsPath, version);
 
@@ -295,7 +335,7 @@ namespace Migrator.Console.Tests
 
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object, true);
 
                 var eventArgs = new MigrationStartedEventArgs(version, scriptName);
                 mockMigrationService.Setup(x => x.Down(0)).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
@@ -310,7 +350,7 @@ namespace Migrator.Console.Tests
             {
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object, true);
 
                 var eventArgs = new MigrationStartedEventArgs(0, "not-relevant");
                 mockMigrationService.Setup(x => x.Down(0)).Callback(() => mockMigrationService.Raise(x => x.OnMigrationStarted += null, eventArgs));
@@ -333,7 +373,7 @@ namespace Migrator.Console.Tests
 
                 var mockMigrationService = new Mock<IMigrationService>();
 
-                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object);
+                SetupActivatorWithServiceFactory(RunnerQualifiedName, ConnectionString, ScriptsPath, mockMigrationService.Object, true);
 
                 mockMigrationService.Setup(x => x.Down(0)).Callback(() => mockMigrationService.Raise(x => x.OnMigrationCompleted += null, EventArgs.Empty));
 

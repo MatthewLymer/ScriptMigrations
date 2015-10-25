@@ -70,6 +70,13 @@ namespace Migrator.Console
                 return;
             }
 
+            if (!result.Instance.CanExecuteTestQuery())
+            {
+                _console.WriteErrorLine(Resources.RunnerFactoryTestQueryFailedMessage);
+                Environment.ExitCode = 1;
+                return;
+            }
+
             var service = _migrationServiceFactory.Create(scriptsPath, result.Instance);
 
             service.OnMigrationStarted += OnMigrationStarted;
