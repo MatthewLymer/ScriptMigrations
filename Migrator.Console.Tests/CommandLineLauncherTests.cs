@@ -14,18 +14,19 @@ namespace Migrator.Console.Tests
         public class WhenCreatingCommandLineLauncherInstance
         {
             [Test]
-            [ExpectedException(typeof(ArgumentNullException))]
             public void ShouldThrowExceptionForArgumentMigratorCommands()
             {
-                Assert.IsNotNull(new CommandLineLauncher(null, null));
+                // ReSharper disable once ObjectCreationAsStatement
+                Assert.Throws<ArgumentNullException>(() => new CommandLineLauncher(null, null));
             }
 
             [Test]
-            [ExpectedException(typeof(ArgumentNullException))]
             public void ShouldThrowExceptionForArgumentCommandLineBinder()
             {
                 var migratorCommands = new Mock<IMigratorCommands>().Object;
-                Assert.IsNotNull(new CommandLineLauncher(migratorCommands, null));
+                
+                // ReSharper disable once ObjectCreationAsStatement
+                Assert.Throws<ArgumentNullException>(() => new CommandLineLauncher(migratorCommands, null));
             }
         }
 

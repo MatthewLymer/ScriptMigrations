@@ -12,10 +12,10 @@ namespace SqlServerMigrator.Tests
             [TestCase(null)]
             [TestCase("")]
             [TestCase("    ")]
-            [ExpectedException(typeof(ArgumentException))]
             public void ShouldThrowExceptionIfNoConnectionStringValueIsSet(string connectionString)
             {
-                Assert.IsNotNull(new RunnerFactory(connectionString));
+                // ReSharper disable once ObjectCreationAsStatement
+                Assert.Throws<ArgumentException>(() => new RunnerFactory(connectionString));
             }
         }
     }

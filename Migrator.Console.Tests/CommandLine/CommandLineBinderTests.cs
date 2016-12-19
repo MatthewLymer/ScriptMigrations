@@ -14,18 +14,19 @@ namespace Migrator.Console.Tests.CommandLine
         public class WhenCreatingACommandLineBuilderInstance
         {
             [Test]
-            [ExpectedException(typeof(ArgumentNullException))]
             public void ShouldThrowExceptionIfParserIsNull()
             {
-                Assert.IsNotNull(new CommandLineBinder<int>(null, null));
+                // ReSharper disable once ObjectCreationAsStatement
+                Assert.Throws<ArgumentNullException>(() => new CommandLineBinder<int>(null, null));
             }
 
             [Test]
-            [ExpectedException(typeof(ArgumentNullException))]
             public void ShouldThrowExceptionIfValidatorIsNull()
             {
                 var mockParser = new Mock<ICommandLineParser<int>>();
-                Assert.IsNotNull(new CommandLineBinder<int>(mockParser.Object, null));
+
+                // ReSharper disable once ObjectCreationAsStatement
+                Assert.Throws<ArgumentNullException>(() => new CommandLineBinder<int>(mockParser.Object, null));
             }
         }
 
@@ -55,10 +56,9 @@ namespace Migrator.Console.Tests.CommandLine
             }
 
             [Test]
-            [ExpectedException(typeof(ArgumentNullException))]
             public void ShouldThrowIfArgsIsNull()
             {
-                _binder.Bind(null);
+                Assert.Throws<ArgumentNullException>(() => _binder.Bind(null));
             }
 
             [Test]
