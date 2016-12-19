@@ -37,8 +37,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentValidation">
-      <HintPath>..\packages\FluentValidation.5.4.0.0\lib\Net40\FluentValidation.dll</HintPath>
+    <Reference Include="FluentValidation, Version=6.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentValidation.6.2.1.0\lib\portable-net40+sl50+wp80+win8+wpa81\FluentValidation.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.1.1311.0615\lib\net40\Moq.dll</HintPath>

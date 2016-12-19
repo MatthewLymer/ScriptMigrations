@@ -80,7 +80,7 @@ function Run-Tests($projectName) {
 	$projectPath = Join-Path (OutputDirectory) "$projectName\$projectName.dll"
 
 	exec {
-		.\nunit\nunit-console.exe $projectPath
+		.\nunit\nunit3-console.exe $projectPath
 	}
 }
 

@@ -34,8 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentValidation">
-      <HintPath>..\packages\FluentValidation.5.4.0.0\lib\Net40\FluentValidation.dll</HintPath>
+    <Reference Include="FluentValidation, Version=6.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentValidation.6.2.1.0\lib\portable-net40+sl50+wp80+win8+wpa81\FluentValidation.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.3.2.2.0\lib\net40\Ninject.dll</HintPath>
